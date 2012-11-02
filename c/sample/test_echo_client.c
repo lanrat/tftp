@@ -123,7 +123,7 @@ char    *argv[];
 	
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	       {
-		printf("%s: can't open datagram socket\n",progname);
+		printf("%s: can't open datagram socket\n",progname);A
 		exit(1);
 	       }
 
