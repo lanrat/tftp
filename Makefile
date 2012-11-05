@@ -9,7 +9,7 @@ server:
 
 
 client: 
-	${CXX} -o tftpclient tftpcient.c
+	${CXX} -o tftpclient tftpclient.c
 
 clean:
 	rm *.o tftpclient tftpserver
