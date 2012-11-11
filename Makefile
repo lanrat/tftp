@@ -1,15 +1,17 @@
 CXX      = gcc
 
+common = packets.c
+flags = -g
+
 default: all
 
 all: server client
 
 server:
-	${CXX} -o tftpserver tftpserver.c
-
+	${CXX} ${flags} -o tftpserver ${common} tftpserver.c 
 
 client: 
-	${CXX} -o tftpclient tftpclient.c
+	${CXX} ${flags} -o tftpclient ${common} tftpclient.c
 
 clean:
 	rm *.o tftpclient tftpserver

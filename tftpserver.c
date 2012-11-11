@@ -1,4 +1,42 @@
 #include "tftp.h"
+#include "packets.h"
+
+void packet_recieve_loop(int sockfd)
+{
+  struct sockaddr pcli_addr;
+  int client_len = sizeof(pcli_addr);
+  int recv_len;
+  char buffer[BUFSISE];
+
+  //main loop
+  while (true)
+  {
+    recv_len = recvfrom(sockfd, buffer, BUFSISE, 0, &pcli_addr, &client_len);
+
+    //check for errors
+    if (recv_len <= 0)
+    {
+      printf("%s: recvfrom error\n",progname);
+      exit(1);
+    }
+    //TODO
+    /* Note that if you are using timeouts, n<0 may not mean an error, */
+    /* but that the call was interrupted by a signal. To see what      */
+    /* happened, you have to look at the value of the system variable  */
+    /* errno (defined in <errno.h>).*/
+
+    PACKET * packet = getPacket(buffer);
+    if (packet != NULL)
+    {
+      printf("Got packet with optcode: %u\n",packet->optcode);
+    }else{
+      printf("Unable to determine packet type\n");
+      printf("got optcode: %2x\n",(unsigned int)*buffer);
+      
+    }
+    printf("Got some data!\n");
+  }
+}
 
 
 int main(int argc, char *argv[])
@@ -29,30 +67,9 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+  //run the main loop
+  packet_recieve_loop(sockfd);
+
 }
 
-void packet_recieve_loop(int sockfd)
-{
-  struct sockaddr pcli_addr;
-  int client_len = sizeof(sockaddr);
-  int recv_len;
-  char buffer[BUFSISE];
 
-  //main loop
-  while (true)
-  {
-    recv_len = recvfrom(sockfd, buffer, BUFSISE, 0, &pcli_addr, client_len);
-
-    //check for errors
-    if (recv_len < 0)
-    {
-      printf("%s: recvfrom error\n",progname);
-      exit(1);
-    }
-    //TODO
-    /* Note that if you are using timeouts, n<0 may not mean an error, */
-    /* but that the call was interrupted by a signal. To see what      */
-    /* happened, you have to look at the value of the system variable  */
-    /* errno (defined in <errno.h>).*/
-  }
-}

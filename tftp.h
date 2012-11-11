@@ -4,7 +4,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdlib.h>
+#include <strings.h>
 
+
+typedef int bool;
+#define true 1
+#define false 0
 
 //port 6100 + group 6
 #define SERV_UDP_PORT   6106

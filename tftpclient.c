@@ -1,17 +1,25 @@
 #include "tftp.h"
 
 
+void send_packet(int sockfd, struct sockaddr* pserv_addr)
+{
+  char[] messge = "Hello World!";
+  int n = sizeof(message);
+}
+
+
 int main(int argc, char *argv[])
 {
   //used for error messages
   progname = argv[0];
+  int sockfd;
 
   
   struct sockaddr_in      cli_addr, serv_addr;
 
   if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
   {
-    printf("%s: can't open datagram socket\n",progname);A
+    printf("%s: can't open datagram socket\n",progname);
     exit(1);
   }
 
