@@ -7,14 +7,13 @@
  */
 PACKET * getPacket(char * buffer)
 {
-  unsigned int optcode = (unsigned int)*buffer;
 
   PACKET * packet = malloc(sizeof(PACKET));
-  packet->optcode = ntohs(optcode);
+  packet->optcode = getHostOrderShortFromNetwork(buffer);
   char* dataOffset = &buffer[2];
   size_t n;
 
-  switch (optcode)
+  switch (packet->optcode)
   {
     case 1: //read
       n = charncpy(packet->read_request.filename,dataOffset,MAX_STRING_SIZE);
@@ -27,7 +26,7 @@ PACKET * getPacket(char * buffer)
       charncpy(packet->write_request.mode,dataOffset,MAX_STRING_SIZE);
       break;
     case 3: //data
-      packet->data.blockNumber = ntohs((unsigned int)*dataOffset);
+      packet->data.blockNumber = ntohs((u_int16_t)*dataOffset);
       dataOffset +=2;
       charncpy(packet->data.data,dataOffset, MAX_STRING_SIZE);
       break;
@@ -62,6 +61,55 @@ size_t charncpy(char *dest, const char *src, size_t n)
         dest[i] = '\0';
     }
 
-    return len;
+    return len+1;
 }
 
+/* A little function to get the host ordering of a short from a pointer */
+u_int16_t getHostOrderShortFromNetwork(void * buff)
+{
+    u_int16_t data;
+    memcpy(&data,buff,sizeof(u_int16_t));
+    return ntohs(data);
+}
+
+/* prints the packet and all fields for debugging */
+void printPacket(PACKET* packet)
+{
+  if (packet == NULL)
+  {
+      printf("Null packet");
+      return;
+  }
+
+  printf("Optcode: [%u] ",packet->optcode);
+
+  switch (packet->optcode)
+  {
+    case 1: //read
+      printf("READ\n");
+      printf("Filename: %s\n",packet->read_request.filename);
+      printf("Mode: %s\n",packet->read_request.mode);
+      break;
+    case 2: //write
+      printf("WRITE\n");
+      printf("Filename: %s\n",packet->write_request.filename);
+      printf("Mode: %s\n",packet->write_request.mode);
+      break;
+    case 3: //data
+      printf("DATA\n");
+      printf("Block #: %u\n",packet->data.blockNumber);
+      break;
+    case 4: //ack
+      printf("ACK\n");
+      printf("Block #: %u\n",packet->ack.blockNumber);
+      break;
+    case 5: //error
+      printf("ERROR\n");
+      printf("ErrorCode: %u\n",packet->error.errorCode);
+      printf("ErrorMessage: %s\n",packet->error.message);
+      break;
+    default:
+      printf("Unknown Packet Type\n");
+      break;
+  }
+}

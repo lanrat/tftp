@@ -1,5 +1,6 @@
 #include "tftp.h"
 #include "packets.h"
+#include "test.h"
 
 void packet_recieve_loop(int sockfd)
 {
@@ -26,15 +27,14 @@ void packet_recieve_loop(int sockfd)
     /* errno (defined in <errno.h>).*/
 
     PACKET * packet = getPacket(buffer);
+
     if (packet != NULL)
     {
-      printf("Got packet with optcode: %u\n",packet->optcode);
+      printPacket(packet);
+
     }else{
       printf("Unable to determine packet type\n");
-      printf("got optcode: %2x\n",(unsigned int)*buffer);
-      
     }
-    printf("Got some data!\n");
   }
 }
 
@@ -71,5 +71,4 @@ int main(int argc, char *argv[])
   packet_recieve_loop(sockfd);
 
 }
-
 

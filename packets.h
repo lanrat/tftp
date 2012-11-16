@@ -1,28 +1,34 @@
-#include <stdlib.h>
+#ifndef PACKETS_H
+#define PACKETS_H
 
-#define MAX_STRING_SIZE 2048
+#include <stdlib.h>
+#include <string.h>
+#include "tftp.h"
+
+#define MAX_STRING_SIZE 1024
+#define MAX_MODE_SIZE 8
 
 typedef struct {
-    char filename[MAX_STRING_SIZE];
-    char mode[MAX_STRING_SIZE];
+    char filename[MAX_STRING_SIZE+1];
+    char mode[MAX_STRING_SIZE+1];
 } RRQ, WRQ;
 
 typedef struct {
-  unsigned int blockNumber;
+  u_int16_t blockNumber;
   char data[512];
 } DATA;
 
 typedef struct {
-  unsigned int blockNumber;
+  u_int16_t blockNumber;
 } ACK;
 
 typedef struct {
-  unsigned int errorCode;
+  u_int16_t errorCode;
   char message[MAX_STRING_SIZE];
 } ERROR;
 
 typedef struct {
-  unsigned int optcode;
+  u_int16_t optcode;
   union {
     RRQ read_request;
     WRQ write_request;
@@ -34,4 +40,11 @@ typedef struct {
 
 
 size_t charncpy(char *dest, const char *src, size_t n);
+
 PACKET* getPacket(char * buffer);
+
+u_int16_t getHostOrderShortFromNetwork(void * buff);
+
+void printPacket(PACKET* packet);
+
+#endif

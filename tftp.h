@@ -1,3 +1,6 @@
+#ifndef TFTP_H
+#define TFTP_H
+
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -19,6 +22,8 @@ typedef int bool;
 
 char *progname;
 
-//TODO thic should be a smaller value
+//TODO this could be a smaller value
 #define BUFSISE 1024
+
+#endif
 
