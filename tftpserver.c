@@ -7,12 +7,12 @@ void packet_recieve_loop(int sockfd)
   struct sockaddr pcli_addr;
   int client_len = sizeof(pcli_addr);
   int recv_len;
-  char buffer[BUFSISE];
+  char buffer[BUFSIZE];
 
   //main loop
   while (true)
   {
-    recv_len = recvfrom(sockfd, buffer, BUFSISE, 0, &pcli_addr, &client_len);
+    recv_len = recvfrom(sockfd, buffer, BUFSIZE, 0, &pcli_addr, &client_len);
 
     //check for errors
     if (recv_len <= 0)

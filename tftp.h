@@ -23,7 +23,7 @@ typedef int bool;
 char *progname;
 
 //TODO this could be a smaller value
-#define BUFSISE 1024
+#define BUFSIZE 1024
 
 #endif
 
