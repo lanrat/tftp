@@ -22,8 +22,8 @@ typedef int bool;
 
 char *progname;
 
-//TODO this could be a smaller value
-#define BUFSIZE 1024
+//max packet size
+#define BUFSIZE 2048
 
 #endif
 

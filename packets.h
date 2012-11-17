@@ -7,6 +7,7 @@
 
 #define MAX_STRING_SIZE 1024
 #define MAX_MODE_SIZE 8
+#define MAX_DATA_SIZE 512
 
 typedef struct {
     char filename[MAX_STRING_SIZE+1];
@@ -15,7 +16,7 @@ typedef struct {
 
 typedef struct {
   u_int16_t blockNumber;
-  char data[512];
+  char data[MAX_DATA_SIZE];
 } DATA;
 
 typedef struct {
@@ -42,8 +43,10 @@ typedef struct {
 size_t charncpy(char *dest, const char *src, size_t n);
 
 PACKET* getPacket(char * buffer);
+size_t setPacket(PACKET* packet, char * buffer);
 
 u_int16_t getHostOrderShortFromNetwork(void * buff);
+u_int16_t getNetworkOrderShortFromHost(u_int16_t hostshort, void * buff);
 
 void printPacket(PACKET* packet);
 
