@@ -43,7 +43,7 @@ typedef struct {
 size_t charncpy(char *dest, const char *src, size_t n);
 
 PACKET* getPacket(char * buffer);
-size_t setPacket(PACKET* packet, char * buffer);
+size_t setPacket(const PACKET* packet, char * buffer);
 
 u_int16_t getHostOrderShortFromNetwork(void * buff);
 u_int16_t getNetworkOrderShortFromHost(u_int16_t hostshort, void * buff);

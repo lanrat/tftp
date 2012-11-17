@@ -48,7 +48,7 @@ PACKET * getPacket(char * buffer)
 
 /* reads data from a packet struct into a buffer to send over the wire
  * returns the size of the buffer to send */
-size_t setPacket(PACKET* packet, char * buffer)
+size_t setPacket(const PACKET* packet, char * buffer)
 {
   if (buffer == NULL || packet == NULL)
   {

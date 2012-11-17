@@ -1,4 +1,4 @@
-CXX      = gcc
+CXX = gcc
 
 common = packets.c test.c
 flags = -g

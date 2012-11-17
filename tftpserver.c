@@ -69,6 +69,5 @@ int main(int argc, char *argv[])
 
   //run the main loop
   packet_recieve_loop(sockfd);
-
 }
 
