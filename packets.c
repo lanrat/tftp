@@ -64,21 +64,21 @@ size_t setPacket(const PACKET* packet, char * buffer)
   switch (packet->optcode)
   {
     case 1: //read
-      n = charncpy(dataOffset,&(packet->read_request.filename),MAX_STRING_SIZE);
+      n = charncpy(dataOffset,packet->read_request.filename,MAX_STRING_SIZE);
       dataOffset += n;
-      charncpy(dataOffset,&(packet->read_request.mode),MAX_MODE_SIZE);
+      charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
       n = sizeof(RRQ);
       break;
    case 2: //write
-      n = charncpy(dataOffset,&(packet->read_request.filename),MAX_STRING_SIZE);
+      n = charncpy(dataOffset,packet->read_request.filename,MAX_STRING_SIZE);
       dataOffset += n;
-      charncpy(dataOffset,&(packet->read_request.mode),MAX_MODE_SIZE);
+      charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
       n = sizeof(WRQ);
       break;
     case 3: //data
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->data.blockNumber,NULL);
       dataOffset +=2; //skip over block number
-      charncpy(dataOffset,&(packet->data.data),MAX_DATA_SIZE);
+      charncpy(dataOffset,packet->data.data,MAX_DATA_SIZE);
       n = sizeof(DATA);
       break;
     case 4: //ack
@@ -88,7 +88,7 @@ size_t setPacket(const PACKET* packet, char * buffer)
     case 5: //error
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->ack.blockNumber,NULL);
       dataOffset +=2; //skip over errorCode
-      charncpy(dataOffset,&(packet->error.message),MAX_STRING_SIZE);
+      charncpy(dataOffset,packet->error.message,MAX_STRING_SIZE);
       n = sizeof(ERROR);
       break;
     default:
