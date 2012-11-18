@@ -2,12 +2,11 @@
 #include "packets.h"
 
 /* 
- * this function will rturn the appropriate  packet struct given a buffer 
+ * this function will return the appropriate packet struct given a buffer 
  * pointer to the next packet recieved
  */
 PACKET * getPacket(char * buffer)
 {
-
   PACKET * packet = malloc(sizeof(PACKET));
   bzero(packet,sizeof(PACKET));
   packet->optcode = getHostOrderShortFromNetwork(buffer);
@@ -67,20 +66,18 @@ size_t setPacket(const PACKET* packet, char * buffer)
     case 1: //read
       n = charncpy(dataOffset,packet->read_request.filename,MAX_STRING_SIZE);
       dataOffset += n;
-      charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
-      n = sizeof(RRQ);
+      n += charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
       break;
    case 2: //write
       n = charncpy(dataOffset,packet->read_request.filename,MAX_STRING_SIZE);
       dataOffset += n;
-      charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
-      n = sizeof(WRQ);
+      n += charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
       break;
     case 3: //data
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->data.blockNumber,NULL);
       dataOffset +=2; //skip over block number
-      charncpy(dataOffset,packet->data.data,MAX_DATA_SIZE);
-      n = sizeof(DATA);
+      n = charncpy(dataOffset,packet->data.data,MAX_DATA_SIZE);
+      n += 2; //add room for the block number
       break;
     case 4: //ack
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->ack.blockNumber,NULL);
@@ -89,8 +86,8 @@ size_t setPacket(const PACKET* packet, char * buffer)
     case 5: //error
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->ack.blockNumber,NULL);
       dataOffset +=2; //skip over errorCode
-      charncpy(dataOffset,packet->error.message,MAX_STRING_SIZE);
-      n = sizeof(ERROR);
+      n = charncpy(dataOffset,packet->error.message,MAX_STRING_SIZE);
+      n += 2; //add room for the block number
       break;
     default:
       return 0;
@@ -146,6 +143,7 @@ void printPacket(PACKET* packet)
       printf("Null packet");
       return;
   }
+  printf("-------[Packet]-------\n");
 
   printf("Optcode: [%u] ",packet->optcode);
 
@@ -178,4 +176,5 @@ void printPacket(PACKET* packet)
       printf("Unknown Packet Type\n");
       break;
   }
+  printf("----------------------\n");
 }

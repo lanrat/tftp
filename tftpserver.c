@@ -28,13 +28,9 @@ void packet_recieve_loop(int sockfd)
 
     PACKET * packet = getPacket(buffer);
 
-    if (packet != NULL)
-    {
-      printPacket(packet);
+    if (DEBUG) printPacket(packet);
 
-    }else{
-      printf("Unable to determine packet type\n");
-    }
+    free(packet);
   }
 }
 
