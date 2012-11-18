@@ -72,7 +72,7 @@ void packet_recieve_loop(int sockfd)
     }else
     {
       //main server code
-      if (DEBUG) printf("spawning new fork with id %u to handle incomming request\n",fork_id);
+      if (DEBUG) printf("spawning fork: %u to handle new request\n",fork_id);
     }
 
   }
@@ -84,6 +84,8 @@ int main(int argc, char *argv[])
 {
   //used for error messages
   progname = argv[0];
+
+  //TODO allow changing od default port via comand line args
 
   //create a socket object
   struct sockaddr_in serv_addr;
