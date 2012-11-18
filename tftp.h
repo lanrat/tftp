@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <errno.h>
 
 
 typedef int bool;
@@ -19,6 +20,8 @@ typedef int bool;
 #define SERV_UDP_PORT   6106
 
 #define SERV_HOST_ADDR  "127.0.0.1"
+
+#define MAX_TFTP_CLIENTS 100
 
 char *progname;
 
