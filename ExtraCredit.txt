@@ -1,0 +1,12 @@
+Implement a run-time option to choose the group specific port from the
+command line, for example, tftpserver -p 7000. If the option is passed to the
+server, it specifies the port to listen to, while if it is passed to the client, it
+specifies the port to which the initial request must be sent to. This makes
+your programs inter operable with standards compliant implementations that
+use “well-known” UDP port # 69. If the option is not present, your programs
+must use your assigned port # as the default.
+
+
+Error messages
+
+multi-user
