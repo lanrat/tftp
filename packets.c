@@ -9,6 +9,7 @@ PACKET * getPacket(char * buffer)
 {
 
   PACKET * packet = malloc(sizeof(PACKET));
+  bzero(packet,sizeof(PACKET));
   packet->optcode = getHostOrderShortFromNetwork(buffer);
   char* dataOffset = &buffer[2];
   size_t n;
