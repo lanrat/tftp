@@ -1,13 +1,29 @@
 #ifndef PACKETS_H
 #define PACKETS_H
 
-#include <stdlib.h>
-#include <string.h>
 #include "tftp.h"
 
 #define MAX_STRING_SIZE 1024
 #define MAX_MODE_SIZE 8
 #define MAX_DATA_SIZE 512
+
+//optcodes
+#define TFTP_OPTCODE_RRQ  1
+#define TFTP_OPTCODE_WRQ  2
+#define TFTP_OPTCODE_DATA 3
+#define TFTP_OPTCODE_ACK  4
+#define TFTP_OPTCODE_ERR  5
+
+//Error Codes
+#define TFTP_ERRCODE_UNDEFINED 0
+#define TFTP_ERRCODE_FILE_NOT_FOUND 1
+#define TFTP_ERRCODE_ACCESS_VIOLATION 2
+#define TFTP_ERRCODE_DISK_FULL 3
+#define TFTP_ERRCODE_ILLEAGAL_OPERATION 4
+#define TFTP_ERRCODE_UNKNOWN_TRANSFER_ID 5
+#define TFTP_ERRCODE_FILE_ALREADY_EXISTS 6
+#define TFTP_ERRCODE_NO_SUCH_USER 7
+
 
 typedef struct {
     char filename[MAX_STRING_SIZE+1];
@@ -16,6 +32,7 @@ typedef struct {
 
 typedef struct {
   u_int16_t blockNumber;
+  unsigned int dataSize;
   char data[MAX_DATA_SIZE];
 } DATA;
 
@@ -40,13 +57,8 @@ typedef struct {
 } PACKET;
 
 
-size_t charncpy(char *dest, const char *src, size_t n);
-
-PACKET* getPacket(char * buffer);
+PACKET* getPacket(char * buffer, size_t bufferSize);
 size_t setPacket(const PACKET* packet, char * buffer);
-
-u_int16_t getHostOrderShortFromNetwork(void * buff);
-u_int16_t getNetworkOrderShortFromHost(u_int16_t hostshort, void * buff);
 
 void printPacket(PACKET* packet);
 

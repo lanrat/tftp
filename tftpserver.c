@@ -1,6 +1,4 @@
 #include "tftp.h"
-#include "packets.h"
-#include "test.h"
 
 //used for counting the number of children procs
 static unsigned int childCount = 0;
@@ -42,7 +40,7 @@ void packet_recieve_loop(int sockfd)
 
     if (childCount < MAX_TFTP_CLIENTS)
     {
-      packet = getPacket(buffer);
+      packet = getPacket(buffer,recv_len);
       fork_id = fork();
     }else{
       //TODO send error

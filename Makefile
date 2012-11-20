@@ -1,6 +1,6 @@
 CXX = gcc
 
-common = packets.c test.c
+common = packets.c test.c common.c pong.c
 flags = -g
 
 default: all

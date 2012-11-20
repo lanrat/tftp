@@ -1,16 +1,19 @@
 #ifndef TFTP_H
 #define TFTP_H
 
-
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <errno.h>
 
+#include "packets.h"
+#include "test.h"
+#include "common.h"
 
 typedef int bool;
 #define true 1
@@ -29,4 +32,3 @@ char *progname;
 #define BUFSIZE 2048
 
 #endif
-

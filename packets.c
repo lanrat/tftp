@@ -1,39 +1,52 @@
-
 #include "packets.h"
 
 /* 
  * this function will return the appropriate packet struct given a buffer 
  * pointer to the next packet recieved
  */
-PACKET * getPacket(char * buffer)
+PACKET * getPacket(char * buffer, size_t bufferSize)
 {
-  PACKET * packet = malloc(sizeof(PACKET));
+  PACKET * packet;
+  char* dataOffset;
+  size_t n;
+  if (bufferSize < 4)
+  {
+    return NULL;
+  }
+
+  packet = malloc(sizeof(PACKET));
   bzero(packet,sizeof(PACKET));
   packet->optcode = getHostOrderShortFromNetwork(buffer);
-  char* dataOffset = &buffer[2];
-  size_t n;
+  dataOffset = &buffer[2];
 
   switch (packet->optcode)
   {
-    case 1: //read
+    case TFTP_OPTCODE_RRQ: //read
       n = charncpy(packet->read_request.filename,dataOffset,MAX_STRING_SIZE);
       dataOffset += n;
       charncpy(packet->read_request.mode,dataOffset,MAX_MODE_SIZE);
       break;
-    case 2: //write
+    case TFTP_OPTCODE_WRQ: //write
       n = charncpy(packet->write_request.filename,dataOffset,MAX_STRING_SIZE);
       dataOffset += n;
       charncpy(packet->write_request.mode,dataOffset,MAX_MODE_SIZE);
       break;
-    case 3: //data
+    case TFTP_OPTCODE_DATA: //data
+      if (bufferSize > MAX_DATA_SIZE)
+      {
+        //ERROR, got more data than allowed
+        free(packet);
+        return NULL;
+      }
       packet->data.blockNumber = getHostOrderShortFromNetwork(dataOffset);
       dataOffset +=2;
-      charncpy(packet->data.data,dataOffset, MAX_DATA_SIZE);
+      packet->data.dataSize = (bufferSize-(2*sizeof(u_int16_t)));
+      memcpy(packet->data.data,dataOffset, bufferSize);
       break;
-    case 4: //ack
+    case TFTP_OPTCODE_ACK: //ack
       packet->ack.blockNumber = getHostOrderShortFromNetwork(dataOffset);
       break;
-    case 5: //error
+    case TFTP_OPTCODE_ERR: //error
       packet->error.errorCode = getHostOrderShortFromNetwork(dataOffset);
       dataOffset +=2;
       charncpy(packet->error.message,dataOffset, MAX_STRING_SIZE);
@@ -63,27 +76,27 @@ size_t setPacket(const PACKET* packet, char * buffer)
 
   switch (packet->optcode)
   {
-    case 1: //read
+    case TFTP_OPTCODE_RRQ: //read
       n = charncpy(dataOffset,packet->read_request.filename,MAX_STRING_SIZE);
       dataOffset += n;
       n += charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
       break;
-   case 2: //write
+   case TFTP_OPTCODE_WRQ: //write
       n = charncpy(dataOffset,packet->read_request.filename,MAX_STRING_SIZE);
       dataOffset += n;
       n += charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
       break;
-    case 3: //data
+   case TFTP_OPTCODE_DATA: //data
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->data.blockNumber,NULL);
       dataOffset +=2; //skip over block number
-      n = charncpy(dataOffset,packet->data.data,MAX_DATA_SIZE);
-      n += 2; //add room for the block number
+      memcpy(dataOffset,packet->data.data,packet->data.dataSize);
+      n += (packet->data.dataSize + 2); //add room for the block number
       break;
-    case 4: //ack
+    case TFTP_OPTCODE_ACK: //ack
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->ack.blockNumber,NULL);
       n = sizeof(ACK);
       break;
-    case 5: //error
+    case TFTP_OPTCODE_ERR: //error
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->ack.blockNumber,NULL);
       dataOffset +=2; //skip over errorCode
       n = charncpy(dataOffset,packet->error.message,MAX_STRING_SIZE);
@@ -94,45 +107,6 @@ size_t setPacket(const PACKET* packet, char * buffer)
   }
   //done
   return n + sizeof(u_int16_t); //sizeof(PACKET)
- 
-}
-
-
-/* prbly very similar to strncpy but returns the size of the string copied */
-size_t charncpy(char *dest, const char *src, size_t n)
-{
-    size_t i,len;
-
-    for (i = 0; i < n && src[i] != '\0'; i++)
-    {
-        dest[i] = src[i];
-    }
-    len = i;
-    for ( ; i < n; i++)
-    {
-        dest[i] = '\0';
-    }
-
-    return len+1;
-}
-
-/* A little function to get the host ordering of a short from a pointer */
-u_int16_t getHostOrderShortFromNetwork(void * buff)
-{
-    u_int16_t data;
-    memcpy(&data,buff,sizeof(u_int16_t));
-    return ntohs(data);
-}
-
-/* A function to get the network ordering of a short from a pointer */
-u_int16_t getNetworkOrderShortFromHost(u_int16_t hostshort, void * buff)
-{
-    u_int16_t data = htons(hostshort);
-    if (buff != NULL)
-    {
-        memcpy(buff,&data,sizeof(u_int16_t));
-    }
-    return data;
 }
 
 /* prints the packet and all fields for debugging */
@@ -149,25 +123,26 @@ void printPacket(PACKET* packet)
 
   switch (packet->optcode)
   {
-    case 1: //read
+    case TFTP_OPTCODE_RRQ: //read
       printf("READ\n");
       printf("Filename: %s\n",packet->read_request.filename);
       printf("Mode: %s\n",packet->read_request.mode);
       break;
-    case 2: //write
+    case TFTP_OPTCODE_WRQ: //write
       printf("WRITE\n");
       printf("Filename: %s\n",packet->write_request.filename);
       printf("Mode: %s\n",packet->write_request.mode);
       break;
-    case 3: //data
+    case TFTP_OPTCODE_DATA: //data
       printf("DATA\n");
       printf("Block #: %u\n",packet->data.blockNumber);
+      printf("DataSize: %u\n",packet->data.dataSize);
       break;
-    case 4: //ack
+    case TFTP_OPTCODE_ACK: //ack
       printf("ACK\n");
       printf("Block #: %u\n",packet->ack.blockNumber);
       break;
-    case 5: //error
+    case TFTP_OPTCODE_ERR: //error
       printf("ERROR\n");
       printf("ErrorCode: %u\n",packet->error.errorCode);
       printf("ErrorMessage: %s\n",packet->error.message);
