@@ -3,6 +3,12 @@
 //used for counting the number of children procs
 static unsigned int childCount = 0;
 
+void process_child(PACKET * packet)
+{
+  //send error
+}
+
+
 void packet_recieve_loop(int sockfd)
 {
   struct sockaddr pcli_addr;
@@ -40,7 +46,7 @@ void packet_recieve_loop(int sockfd)
 
     if (childCount < MAX_TFTP_CLIENTS)
     {
-      packet = getPacket(buffer,recv_len);
+      packet = unserializePacket(buffer,recv_len);
       fork_id = fork();
     }else{
       //TODO send error
@@ -61,6 +67,7 @@ void packet_recieve_loop(int sockfd)
       if (DEBUG) printPacket(packet);
       
       //child code here, deal with the packet
+      process_child(packet);
       
       free(packet);
       

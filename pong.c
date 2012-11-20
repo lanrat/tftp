@@ -11,7 +11,7 @@ bool send_RRQ(int sockfd, struct sockaddr_in* sockInfo, char* filename, char* mo
   charncpy(packet.read_request.filename,filename,MAX_STRING_SIZE);
   charncpy(packet.read_request.mode,mode,MAX_MODE_SIZE);
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
@@ -26,7 +26,7 @@ bool send_WRQ(int sockfd, struct sockaddr_in* sockInfo, char* filename, char* mo
   charncpy(packet.read_request.filename,filename,MAX_STRING_SIZE);
   charncpy(packet.read_request.mode,mode,MAX_MODE_SIZE);
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
 
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
@@ -42,7 +42,7 @@ bool send_data(int sockfd, struct sockaddr_in* sockInfo, u_int16_t blockNumber, 
   packet.data.dataSize = data_size;
   charncpy(packet.data.data,data,data_size);
   
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr*)) >= 0);
 }
@@ -58,7 +58,7 @@ bool send_error(int sockfd, struct sockaddr_in* sockInfo, u_int16_t errorCode, c
   packet.error.errorCode = errorCode;
   strncpy(packet.error.message, error_message,MAX_STRING_SIZE);
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
@@ -73,7 +73,7 @@ bool send_ack(int sockfd, struct sockaddr_in* sockInfo, u_int16_t blockNumber)
   packet.optcode = TFTP_OPTCODE_ACK;
   packet.ack.blockNumber = blockNumber;
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }

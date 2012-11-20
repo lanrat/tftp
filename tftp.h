@@ -15,6 +15,7 @@
 #include "test.h"
 #include "common.h"
 #include "pong.h"
+#include "filetransfer.h"
 
 //port 6100 + group 6
 #define SERV_UDP_PORT   6106

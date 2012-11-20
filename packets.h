@@ -57,8 +57,8 @@ typedef struct {
 } PACKET;
 
 
-PACKET* getPacket(char * buffer, size_t bufferSize);
-size_t setPacket(const PACKET* packet, char * buffer);
+PACKET* unserializePacket(char * buffer, size_t bufferSize);
+size_t serializePacket(const PACKET* packet, char * buffer);
 
 void printPacket(PACKET* packet);
 
