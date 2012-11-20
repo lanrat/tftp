@@ -14,10 +14,7 @@
 #include "packets.h"
 #include "test.h"
 #include "common.h"
-
-typedef int bool;
-#define true 1
-#define false 0
+#include "pong.h"
 
 //port 6100 + group 6
 #define SERV_UDP_PORT   6106
