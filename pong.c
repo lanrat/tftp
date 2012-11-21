@@ -4,8 +4,41 @@
 #define TIMEOUT_TIME 5
 volatile int timesup = 0;
 
+//returns the handle to a socket on the given port
+//if the port is 0 then the OS will pick an avaible port
+int createUDPSocketAndBind(int port)
+{
+  int sockfd;
+  struct sockaddr_in serv_addr;
+  
+  //create a socket
+  sockfd = socket(PF_INET, SOCK_DGRAM, 0);
 
-bool send_RRQ(int sockfd, struct sockaddr_in* sockInfo, char* filename, char* mode)
+  //return -1 on error
+  if (sockfd == -1)
+  {
+    return -1;
+  }
+  
+  //zero out the struct
+  bzero((char*) &serv_addr, sizeof(serv_addr));
+
+  //create the struct to bind on
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  serv_addr.sin_port = htons(port);
+
+  //bind to it
+  if (bind(sockfd,(struct sockaddr*)&serv_addr,sizeof(serv_addr)) < 0)
+  {
+    //error
+    return -1;
+  }
+
+  return sockfd;
+}
+
+bool send_RRQ(int sockfd, struct sockaddr* sockInfo, char* filename, char* mode)
 {
   PACKET packet;
   char buffer[BUFSIZE];
@@ -15,12 +48,12 @@ bool send_RRQ(int sockfd, struct sockaddr_in* sockInfo, char* filename, char* mo
   charncpy(packet.read_request.filename,filename,MAX_STRING_SIZE);
   charncpy(packet.read_request.mode,mode,MAX_MODE_SIZE);
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
 
-bool send_WRQ(int sockfd, struct sockaddr_in* sockInfo, char* filename, char* mode)
+bool send_WRQ(int sockfd, struct sockaddr* sockInfo, char* filename, char* mode)
 {
   PACKET packet;
   char buffer[BUFSIZE];
@@ -30,12 +63,12 @@ bool send_WRQ(int sockfd, struct sockaddr_in* sockInfo, char* filename, char* mo
   charncpy(packet.read_request.filename,filename,MAX_STRING_SIZE);
   charncpy(packet.read_request.mode,mode,MAX_MODE_SIZE);
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
 
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
 
-bool send_data(int sockfd, struct sockaddr_in* sockInfo, u_int16_t blockNumber, char* data, size_t data_size)
+bool send_data(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber, char* data, size_t data_size)
 {
   PACKET packet;
   char buffer[BUFSIZE];
@@ -46,13 +79,13 @@ bool send_data(int sockfd, struct sockaddr_in* sockInfo, u_int16_t blockNumber, 
   packet.data.dataSize = data_size;
   charncpy(packet.data.data,data,data_size);
   
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr*)) >= 0);
 }
 
 //sends the arror message to the socket with the provided errorcode and message
-bool send_error(int sockfd, struct sockaddr_in* sockInfo, u_int16_t errorCode, char* error_message)
+bool send_error(int sockfd, struct sockaddr* sockInfo, u_int16_t errorCode, char* error_message)
 {
   PACKET packet;
   char buffer[BUFSIZE];
@@ -62,13 +95,13 @@ bool send_error(int sockfd, struct sockaddr_in* sockInfo, u_int16_t errorCode, c
   packet.error.errorCode = errorCode;
   strncpy(packet.error.message, error_message,MAX_STRING_SIZE);
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
 
 //send an ack reply back to somewhere
-bool send_ack(int sockfd, struct sockaddr_in* sockInfo, u_int16_t blockNumber)
+bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
 {
   PACKET packet;
   char buffer[BUFSIZE];
@@ -77,7 +110,7 @@ bool send_ack(int sockfd, struct sockaddr_in* sockInfo, u_int16_t blockNumber)
   packet.optcode = TFTP_OPTCODE_ACK;
   packet.ack.blockNumber = blockNumber;
 
-  n = setPacket(&packet,buffer);
+  n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }

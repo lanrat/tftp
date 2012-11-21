@@ -4,7 +4,7 @@
  * this function will return the appropriate packet struct given a buffer 
  * pointer to the next packet recieved
  */
-PACKET * getPacket(char * buffer, size_t bufferSize)
+PACKET * unserializePacket(char * buffer, size_t bufferSize)
 {
   PACKET * packet;
   char* dataOffset;
@@ -61,7 +61,7 @@ PACKET * getPacket(char * buffer, size_t bufferSize)
 
 /* reads data from a packet struct into a buffer to send over the wire
  * returns the size of the buffer to send */
-size_t setPacket(const PACKET* packet, char * buffer)
+size_t serializePacket(const PACKET* packet, char * buffer)
 {
   if (buffer == NULL || packet == NULL)
   {
