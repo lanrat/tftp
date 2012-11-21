@@ -1,6 +1,6 @@
 #include "tftp.h"
 
 
-bool sendfile(int sockfd, int fileh);
+bool sendFile(int sockfd,struct sockaddr* cli_addr, int fileh);
 
-bool recvfile(int sockfd, int fileh);
+bool recvFile(int sockfd, struct sockaddr* cli_addr,int fileh);

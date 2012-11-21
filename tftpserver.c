@@ -3,6 +3,19 @@
 //used for counting the number of children procs
 static unsigned int childCount = 0;
 
+bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
+{
+    bool result;
+    //TOOD open file handle
+
+    result = send_ack(sockfd,cli_addr,0);
+    if (!result)
+    {
+      return false;
+    }
+    return recvFile(sockfd,cli_addr,0);
+}
+
 void run_child(struct sockaddr cli_addr, PACKET * packet)
 {
   if (packet == NULL)
@@ -21,22 +34,20 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
     case TFTP_OPTCODE_RRQ:
       //TODO handle some stuff
       //make a call to sendfile()
+      result = false;
       break;
     case TFTP_OPTCODE_WRQ:
-      //TODO handle some other things
-      //make a call to recvfile()
+      result = server_recieve(child_sockfd,&cli_addr,packet);
       break;
     default:
       result = send_error(child_sockfd, &cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION,"Unexpected Packet");
       break;
   }
 
-  //TODO this will need to be moved for RRQ and WRQ
   if (result == false)
   {
-    printf("Failed sending message to client\n");
+    printf("Failed to handle client resuest\n");
   }
-
 }
 
 
@@ -61,7 +72,7 @@ void packet_recieve_loop(int sockfd)
     //check for errors
     if (recv_len <= 0)
     {
-      printf("%s: recvfrom error\n",progname);
+      printf("recvfrom error\n");
       perror("Socket read:");
       if (recv_len == 0)
       {
@@ -117,9 +128,6 @@ void packet_recieve_loop(int sockfd)
 
 int main(int argc, char *argv[])
 {
-  //used for error messages
-  progname = argv[0];
-
   //TODO allow changing of default port via comand line args
 
   int sockfd;

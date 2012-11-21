@@ -1,12 +1,31 @@
 #include "filetransfer.h"
 
+/* how use use these functions
+   File handles should be opened and checked before any calls
+  
+   Client sending file:
+    send WRQ
+    wait for ack
+    sendfile()
+   Client recieving file:
+    send RRQ
+    recvfile()
+   Server sending file:
+    sendfile()
+   Server receiving file:
+    send ack
+    recvfile()
+
+ */
+
+
 /* This function sends a file to a remote host client or server */
-bool sendfile(int sockfd, int fileh)
+bool sendFile(int sockfd, struct sockaddr* cli_addr, int fileh)
 {
   //sudo-code
   //while there is data left to send:
   //  send a data pacekt
-  //  wait for ack
+  //  wait for ack, check for error recieved
   //    if timeout:
   //      if timeout_counter > max_timeouts:
   //        send error
@@ -21,10 +40,10 @@ bool sendfile(int sockfd, int fileh)
 
 
 /* This function recieves a file from a remote host client or server */
-bool recvfile(int sockfd, int fileh)
+bool recvFile(int sockfd, struct sockaddr* cli_addr, int fileh)
 {
   //sudo code
-  //while we recieve more data packets:
+  //while we recieve more data packets: (check for errors recieved)
   //  if timeout:
   //    if timeout_counter > max_timeouts:
   //      send error
