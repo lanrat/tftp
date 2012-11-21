@@ -4,9 +4,8 @@
  * this function will return the appropriate packet struct given a buffer 
  * pointer to the next packet recieved
  */
-PACKET * unserializePacket(char * buffer, size_t bufferSize)
+PACKET * unserializePacket(char * buffer, size_t bufferSize, PACKET* packet)
 {
-  PACKET * packet;
   char* dataOffset;
   size_t n;
   if (bufferSize < 4)
@@ -14,7 +13,10 @@ PACKET * unserializePacket(char * buffer, size_t bufferSize)
     return NULL;
   }
 
-  packet = malloc(sizeof(PACKET));
+  if (packet == NULL)
+  {
+    packet = malloc(sizeof(PACKET));
+  }
   bzero(packet,sizeof(PACKET));
   packet->optcode = getHostOrderShortFromNetwork(buffer);
   dataOffset = &buffer[2];

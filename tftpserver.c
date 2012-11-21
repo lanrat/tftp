@@ -3,6 +3,19 @@
 //used for counting the number of children procs
 static unsigned int childCount = 0;
 
+bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
+{
+    bool result;
+    //TOOD open file handle
+
+    result = send_ack(sockfd,cli_addr,0);
+    if (!result)
+    {
+      return false;
+    }
+    return recvFile(sockfd,cli_addr,0);
+}
+
 void run_child(struct sockaddr cli_addr, PACKET * packet)
 {
   if (packet == NULL)
@@ -16,14 +29,25 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
   //create the child socket which will be on a new port
   child_sockfd = createUDPSocketAndBind(0);
 
-  //testing
-  result = send_error(child_sockfd, &cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION,"You shall not pass");
+  switch (packet->optcode)
+  {
+    case TFTP_OPTCODE_RRQ:
+      //TODO handle some stuff
+      //make a call to sendfile()
+      result = false;
+      break;
+    case TFTP_OPTCODE_WRQ:
+      result = server_recieve(child_sockfd,&cli_addr,packet);
+      break;
+    default:
+      result = send_error(child_sockfd, &cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION,"Unexpected Packet");
+      break;
+  }
 
   if (result == false)
   {
-    printf("Failed sending msg to client\n");
+    printf("Failed to handle client resuest\n");
   }
-
 }
 
 
@@ -34,7 +58,7 @@ void packet_recieve_loop(int sockfd)
   int recv_len;
   char buffer[BUFSIZE];
   pid_t fork_id;
-  PACKET * packet;
+  PACKET packet;
 
   //main loop
   while (true)
@@ -48,7 +72,7 @@ void packet_recieve_loop(int sockfd)
     //check for errors
     if (recv_len <= 0)
     {
-      printf("%s: recvfrom error\n",progname);
+      printf("recvfrom error\n");
       perror("Socket read:");
       if (recv_len == 0)
       {
@@ -64,7 +88,7 @@ void packet_recieve_loop(int sockfd)
 
     if (childCount < MAX_TFTP_CLIENTS)
     {
-      packet = unserializePacket(buffer,recv_len);
+      unserializePacket(buffer,recv_len,&packet);
       fork_id = fork();
     }else{
       printf("Error: Server too busy to accept new clients\n");
@@ -75,6 +99,7 @@ void packet_recieve_loop(int sockfd)
     if (fork_id < 0)
     {
       printf("Error: could not fork child process\n");
+      send_error(sockfd, &cli_addr, TFTP_ERRCODE_UNDEFINED,"Unable to handle client request");
       exit(1);
     }else if (fork_id == 0)
     {
@@ -82,13 +107,11 @@ void packet_recieve_loop(int sockfd)
       close(sockfd);
       childCount++;
 
-      if (DEBUG) printPacket(packet);
-      
+      if (DEBUG) printPacket(&packet);
+
       //child code here, deal with the packet
-      run_child(cli_addr,packet);
-      
-      free(packet);
-      
+      run_child(cli_addr,&packet);
+
       //end of child execution
       childCount--;
       exit(0); //end the child
@@ -105,9 +128,6 @@ void packet_recieve_loop(int sockfd)
 
 int main(int argc, char *argv[])
 {
-  //used for error messages
-  progname = argv[0];
-
   //TODO allow changing of default port via comand line args
 
   int sockfd;

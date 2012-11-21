@@ -24,8 +24,6 @@
 
 #define MAX_TFTP_CLIENTS 100
 
-char *progname;
-
 //max packet size
 #define BUFSIZE 2048
 
