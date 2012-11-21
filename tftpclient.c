@@ -1,4 +1,6 @@
 #include "tftp.h"
+#include "packets.h"
+#include "pong.h"
 
 
 void send_packet(int sockfd, struct sockaddr* pserv_addr)
@@ -7,7 +9,7 @@ void send_packet(int sockfd, struct sockaddr* pserv_addr)
   int n = sizeof(message);
 }
 
-
+//
 int main(int argc, char *argv[])
 {
   //used for error messages
@@ -42,6 +44,22 @@ int main(int argc, char *argv[])
   }
 
 
+  if(argv[1][0] == '-')
+  {
+    switch(argv[1][1])
+    {
+      case 'r':
+        recvfile(argv[2]);
+        break;
+      case 'w':
+        sendfile(argv[2]);
+        break;
+      case default: 
+        printf("Not a valid action \n");
+        break;
+    }
+
+  }
   //ready for packet magic here!
 
 }

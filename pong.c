@@ -1,6 +1,10 @@
 #include "pong.h"
 
 
+#define TIMEOUT_TIME 5
+volatile int timesup = 0;
+
+
 bool send_RRQ(int sockfd, struct sockaddr_in* sockInfo, char* filename, char* mode)
 {
   PACKET packet;
@@ -76,5 +80,22 @@ bool send_ack(int sockfd, struct sockaddr_in* sockInfo, u_int16_t blockNumber)
   n = setPacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
+}
+
+void handler(int sig)
+{
+  timesup = 1;
+  alarm(0);
+}
+
+bool waiting()
+{
+
+  signal(SIGALRM, handler);
+  alarm(time);
+  do{
+    recvfrom
+  }while(!timesup);
+  return 1;
 }
 
