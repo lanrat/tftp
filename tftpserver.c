@@ -3,16 +3,34 @@
 //used for counting the number of children procs
 static unsigned int childCount = 0;
 
-void process_child(PACKET * packet)
+void run_child(struct sockaddr cli_addr, PACKET * packet)
 {
-  //send error
+  if (packet == NULL)
+  {
+    return;
+  }
+
+  int child_sockfd;
+  bool result;
+
+  //create the child socket which will be on a new port
+  child_sockfd = createUDPSocketAndBind(0);
+
+  //testing
+  result = send_error(child_sockfd, &cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION,"You shall not pass");
+
+  if (result == false)
+  {
+    printf("Failed sending msg to client\n");
+  }
+
 }
 
 
 void packet_recieve_loop(int sockfd)
 {
-  struct sockaddr pcli_addr;
-  int client_len = sizeof(pcli_addr);
+  struct sockaddr cli_addr;
+  size_t cli_size = sizeof(cli_size);
   int recv_len;
   char buffer[BUFSIZE];
   pid_t fork_id;
@@ -25,7 +43,7 @@ void packet_recieve_loop(int sockfd)
     memset(buffer,0,BUFSIZE);
 
     //recieve the data
-    recv_len = recvfrom(sockfd, buffer, BUFSIZE, 0, &pcli_addr, &client_len);
+    recv_len = recvfrom(sockfd, buffer, BUFSIZE, 0, &cli_addr, (socklen_t *)&cli_size);
 
     //check for errors
     if (recv_len <= 0)
@@ -49,8 +67,8 @@ void packet_recieve_loop(int sockfd)
       packet = unserializePacket(buffer,recv_len);
       fork_id = fork();
     }else{
-      //TODO send error
       printf("Error: Server too busy to accept new clients\n");
+      send_error(sockfd, &cli_addr, TFTP_ERRCODE_UNDEFINED,"Too many clients");
       continue;
     }
 
@@ -67,7 +85,7 @@ void packet_recieve_loop(int sockfd)
       if (DEBUG) printPacket(packet);
       
       //child code here, deal with the packet
-      process_child(packet);
+      run_child(cli_addr,packet);
       
       free(packet);
       
@@ -90,30 +108,12 @@ int main(int argc, char *argv[])
   //used for error messages
   progname = argv[0];
 
-  //TODO allow changing od default port via comand line args
+  //TODO allow changing of default port via comand line args
 
-  //create a socket object
-  struct sockaddr_in serv_addr;
   int sockfd;
-  if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-  {
-    printf("%s: can't open datagram socket\n",progname);
-    exit(1);
-  }
-  
-  //zero out the struct
-  bzero((char*) &serv_addr, sizeof(serv_addr));
 
-  //set some struct args
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  serv_addr.sin_port = htons(SERV_UDP_PORT);
-
-  if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-  {
-    printf("%s: can't bind local address\n",progname);
-    exit(1);
-  }
+  //bind to our socket
+  sockfd = createUDPSocketAndBind(SERV_UDP_PORT);
 
   //run the main loop
   packet_recieve_loop(sockfd);
