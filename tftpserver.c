@@ -47,7 +47,7 @@ void packet_recieve_loop(int sockfd)
   int recv_len;
   char buffer[BUFSIZE];
   pid_t fork_id;
-  PACKET * packet;
+  PACKET packet;
 
   //main loop
   while (true)
@@ -77,7 +77,7 @@ void packet_recieve_loop(int sockfd)
 
     if (childCount < MAX_TFTP_CLIENTS)
     {
-      packet = unserializePacket(buffer,recv_len);
+      unserializePacket(buffer,recv_len,&packet);
       fork_id = fork();
     }else{
       printf("Error: Server too busy to accept new clients\n");
@@ -96,12 +96,10 @@ void packet_recieve_loop(int sockfd)
       close(sockfd);
       childCount++;
 
-      if (DEBUG) printPacket(packet);
+      if (DEBUG) printPacket(&packet);
 
       //child code here, deal with the packet
-      run_child(cli_addr,packet);
-
-      free(packet);
+      run_child(cli_addr,&packet);
 
       //end of child execution
       childCount--;

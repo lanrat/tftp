@@ -15,14 +15,14 @@
 #define TFTP_OPTCODE_ERR  5
 
 //Error Codes
-#define TFTP_ERRCODE_UNDEFINED 0
-#define TFTP_ERRCODE_FILE_NOT_FOUND 1
-#define TFTP_ERRCODE_ACCESS_VIOLATION 2
-#define TFTP_ERRCODE_DISK_FULL 3
-#define TFTP_ERRCODE_ILLEGAL_OPERATION 4
+#define TFTP_ERRCODE_UNDEFINED           0
+#define TFTP_ERRCODE_FILE_NOT_FOUND      1
+#define TFTP_ERRCODE_ACCESS_VIOLATION    2
+#define TFTP_ERRCODE_DISK_FULL           3
+#define TFTP_ERRCODE_ILLEGAL_OPERATION   4
 #define TFTP_ERRCODE_UNKNOWN_TRANSFER_ID 5
 #define TFTP_ERRCODE_FILE_ALREADY_EXISTS 6
-#define TFTP_ERRCODE_NO_SUCH_USER 7
+#define TFTP_ERRCODE_NO_SUCH_USER        7
 
 
 typedef struct {
@@ -57,7 +57,7 @@ typedef struct {
 } PACKET;
 
 
-PACKET* unserializePacket(char * buffer, size_t bufferSize);
+PACKET* unserializePacket(char * buffer, size_t bufferSize, PACKET * packet);
 size_t serializePacket(const PACKET* packet, char * buffer);
 
 void printPacket(PACKET* packet);
