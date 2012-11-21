@@ -16,9 +16,22 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
   //create the child socket which will be on a new port
   child_sockfd = createUDPSocketAndBind(0);
 
-  //testing
-  result = send_error(child_sockfd, &cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION,"You shall not pass");
+  switch (packet->optcode)
+  {
+    case TFTP_OPTCODE_RRQ:
+      //TODO handle some stuff
+      //make a call to sendfile()
+      break;
+    case TFTP_OPTCODE_WRQ:
+      //TODO handle some other things
+      //make a call to recvfile()
+      break;
+    default:
+      result = send_error(child_sockfd, &cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION,"Unexpected Packet");
+      break;
+  }
 
+  //TODO this will need to be moved for RRQ and WRQ
   if (result == false)
   {
     printf("Failed sending msg to client\n");
@@ -75,6 +88,7 @@ void packet_recieve_loop(int sockfd)
     if (fork_id < 0)
     {
       printf("Error: could not fork child process\n");
+      send_error(sockfd, &cli_addr, TFTP_ERRCODE_UNDEFINED,"Unable to handle client request");
       exit(1);
     }else if (fork_id == 0)
     {
@@ -83,12 +97,12 @@ void packet_recieve_loop(int sockfd)
       childCount++;
 
       if (DEBUG) printPacket(packet);
-      
+
       //child code here, deal with the packet
       run_child(cli_addr,packet);
-      
+
       free(packet);
-      
+
       //end of child execution
       childCount--;
       exit(0); //end the child
