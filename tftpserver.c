@@ -34,7 +34,7 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
   //TODO this will need to be moved for RRQ and WRQ
   if (result == false)
   {
-    printf("Failed sending msg to client\n");
+    printf("Failed sending message to client\n");
   }
 
 }
