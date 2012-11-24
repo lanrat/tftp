@@ -43,8 +43,9 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
   PACKET packet;
-  int timeoutflag = 0;
-  int op;
+  int op = TFTP_OPTCODE_DATA;
+  int timeoutORerrorflag;
+  size_t n;
   
   //currently without timeouts
 
@@ -53,30 +54,27 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //IAN! I need to get back to this but I will not be able to very soon.
   //I am going home tonight. 11/21/12
   do{
-    //timeoutflag = waiting(sockfd, cli_addr, &op, &buffer, &packet);
-    if(!timeoutflag)
-      //unserializePacket(buffer, n, &packet);
-
+      timeoutORerrorflag = waitforpacket(sockfd, cli_addr, op, &packet);
       //Receive an ERROR
-      if(op == 5)
+     if(timeoutORerrorflag == -1)
       {
-        printf("Error packet received");
-      }
-      //Receive a DATA packet
-      else if(packet.optcode == 3)
-      {
-      if(fputs(packet.data.data, fileh))
-      {
-        send_ack(sockfd, cli_addr, packet.data.blockNumber);
-      }
-      else 
-      {
-        send_error(sockfd, cli_addr, 0,
-            "Was not able to write data in data packet to file.\n");
         return false;
       }
-    }
-  } while(false);
+      //Receive a DATA packet
+      else
+      {
+        if(fputs(packet.data.data, fileh))
+        {
+          send_ack(sockfd, cli_addr, packet.data.blockNumber);
+        }
+        else 
+        {
+          send_error(sockfd, cli_addr, 0,
+              "Was not able to write data in data packet to file.\n");
+          return false;
+        }
+      }
+  } while(packet.data.dataSize = MAX_DATA_SIZE);
   //} while(n != 0);
 
   return true;

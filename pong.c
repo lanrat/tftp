@@ -123,23 +123,30 @@ void handler(int sig)
 }
 
 
-//waiting(): recv's a packet or times out. If a packet is received, the op variable
-//is set to the optcode of the packet received (to be compaired to 
-//optcode expected in the function that called it) 
+ 
 
-/*bool waiting(int sockfd, struct sockaddr* cli_addr,
-                 u_int16_t *optcode, char * buffer[], PACKET* packet)
+bool waitforpacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACKET* packet)
 {
   char buffer[BUFSIZE];
   size_t n;
+  size_t cli_size = sizeof(cli_addr);
 
-  signal(SIGALRM, handler);
-  alarm(TIMEOUT_TIME);
+ // signal(SIGALRM, handler);
+ // alarm(TIMEOUT_TIME);
 
-  n = recvfrom(sockfd, buffer, BUFSIZE, &cli_addr, sizeof(struct sockaddr));
-  unserializePacket(buffer, n, &packet);
-  optcode = packet.optcode;
-
+  do{
+    n = recvfrom(sockfd, buffer, BUFSIZE, 0, cli_addr, (socklen_t *)&cli_size);
+    unserializePacket(buffer, n, packet);
+    if (optcode == packet->optcode)
+    {
+      return 0;
+    }
+    else if(packet->optcode == TFTP_OPTCODE_ERR)
+    {
+      return -1;
+    }
+  } while(n = MAX_DATA_SIZE);
+  /*
   if(timesup)
   {
     return 1;
@@ -148,4 +155,5 @@ void handler(int sig)
   {
     return 0;
   }
-}*/
+  */
+}

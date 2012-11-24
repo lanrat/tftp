@@ -55,7 +55,7 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
 void packet_recieve_loop(int sockfd)
 {
   struct sockaddr cli_addr;
-  size_t cli_size = sizeof(cli_size);
+  size_t cli_size = sizeof(cli_addr);
   int recv_len;
   char buffer[BUFSIZE];
   pid_t fork_id;
