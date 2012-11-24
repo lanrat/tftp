@@ -38,71 +38,22 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 
   u_int16_t blockNumber = 0;
   char buffer[MAX_DATA_SIZE];
-  PACKET packet;
   size_t n;
-  int result;
-  unsigned int timeout_counter = 0;
-  
-  //send the next chunk of data to the recivever
-  n = fread(buffer,1,MAX_DATA_SIZE,fileh);
 
   do
   {
+    n = fread(buffer,1,MAX_DATA_SIZE,fileh);
     send_data(sockfd, cli_addr, blockNumber,buffer,n);
-
-    //wait for ack
-    result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_ACK,&packet);
-
-    //check for timeout
-    if (result == -1)
-    {
-      if (timeout_counter > MAX_TFTP_TIMEOUTS)
-      {
-        send_error(sockfd,cli_addr,TFTP_ERRCODE_ILLEGAL_OPERATION,"Too many timeouts");
-        return false;
-      }
-      timeout_counter++;
-    }else
-    {
-      //check for error
-      if (packet->optcode == TFTP_OPTCODE_ERR)
-      {
-        //TODO call errorhandler
-        return false;
-      }
-      timeout_counter = 0;
-
-      if (n > 0){
-        //send the next chunk of data to the recivever
-        n = fread(buffer,1,MAX_DATA_SIZE,fileh);
-      }
-    }
   } while (n == MAX_DATA_SIZE);
 
-  return true;
+  return false;
 }
 
 
 /* This function recieves a file from a remote host client or server */
 bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
-  //sudo code
-  //while we recieve more data packets: (check for errors recieved)
-  //  if timeout:
-  //    if timeout_counter > max_timeouts:
-  //      send error
-  //      return false
-  //    increase timeout_counter
-  //    resend ack
-  //  else:
-  //    reset timeout_counter
-  //    write the data to a file
-  //    if successful:
-  //      send ack
-  //    else:
-  //     send error
-  //     return false
-  //return true
+  
   PACKET packet;
   int result;
   unsigned int timeout_counter = 0;
@@ -131,6 +82,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
 
         //if not an error packet, return 
+        return true;
         
       }
       else                                  //correct packet
