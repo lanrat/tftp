@@ -104,38 +104,48 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //     return false
   //return true
   PACKET packet;
-  int op = TFTP_OPTCODE_DATA;
-  int timeoutORerrorflag;
-  size_t n;
-  
-  //currently without timeouts
+  int result;
+  unsigned int timeout_counter = 0;
 
-  //TODO fix and add a waiting function that the pseudo code is in pong.c
-  //does NOT currently work how I want it to
-  //IAN! I need to get back to this but I will not be able to very soon.
-  //I am going home tonight. 11/21/12
   do{
-      timeoutORerrorflag = waitForPacket(sockfd, cli_addr, op, &packet);
-      //Receive an ERROR
-     if(timeoutORerrorflag == -1)
+      result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_DATA, &packet);
+      if(result == -1)     //timeout
       {
-        return false;
+        if(timeout_counter < MAX_TFTP_TIMEOUTS)
+        {
+          timeout_counter++;
+        }
+        else
+        {
+          send_error(sockfd, cli_addr, 0, "Reached 10 timeouts.\n");
+          return false; 
+        }
+                            
       }
-      //Receive a DATA packet
-      else
+      else if(result == 0) //result == 0
       {
-        if(fputs(packet.data.data, fileh))
+        if(packet.optcode == TFTP_OPTCODE_ERR)
+        {
+          //error handler
+          return false;
+        }
+
+        //if not an error packet, return 
+        
+      }
+      else                                  //correct packet
+      {
+        if(fwrite(packet.data.data, 1, result, fileh))
         {
           send_ack(sockfd, cli_addr, packet.data.blockNumber);
         }
         else 
         {
-          send_error(sockfd, cli_addr, 0,
-              "Was not able to write data in data packet to file.\n");
+          send_error(sockfd, cli_addr, 0, "Did not write to file.\n");
           return false;
         }
       }
-  } while(packet.data.dataSize = MAX_DATA_SIZE);
+  } while(result == MAX_DATA_SIZE);
   //} while(n != 0);
 
   return true;
