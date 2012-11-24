@@ -22,6 +22,4 @@ bool send_error(int sockfd, struct sockaddr* sockInfo, u_int16_t errorCode, char
 
 int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACKET* packet);
 
-void handler(int sig);
-
 #endif

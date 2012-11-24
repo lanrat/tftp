@@ -59,4 +59,6 @@ size_t serializePacket(const PACKET* packet, char * buffer);
 
 void printPacket(PACKET* packet);
 
+void printError(PACKET * packet)
+
 #endif

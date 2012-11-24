@@ -156,3 +156,46 @@ void printPacket(PACKET* packet)
   }
   printf("----------------------\n");
 }
+
+
+// this is used as the error handler when we recieve an error packet
+void printError(PACKET * packet)
+{
+  if (packet->optcode != TFTP_OPTCODE_ERR)
+  {
+    //not error packet
+    return;
+  }
+  printf("Error recieved with CODE: [");
+  switch (packet->error.errorcode)
+  {
+    case TFTP_ERRCODE_UNDEFINED:
+      printf("Undefined");
+      break;
+    case TFTP_ERRCODE_FILE_NOT_FOUND:
+      printf("File Not Found");
+      break;
+    case TFTP_ERRCODE_ACCESS_VIOLATION:
+      printf("Access Violation");
+      break;
+    case TFTP_ERRCODE_DISK_FULL:
+      printf("Disk Full");
+      break;
+    case TFTP_ERRCODE_UNKNOWN_TRANSFER_ID:
+      printf("Unknown Transfer ID");
+      break;
+    case TFTP_ERRCODE_FILE_ALREADY_EXISTS:
+      printf("File Already Exists");
+      break;
+    case TFTP_ERRCODE_NO_SUCH_USER:
+      printf("No Such User");
+      break;
+    case TFTP_ERRCODE_ILLEGAL_OPERATION:
+      printf("Illegal Operation");
+      break;
+    default:
+      printf("%u",packet->errorcode);
+      break;
+  }
+  printf("] Message: %s\n",packet->error.message);
+}
