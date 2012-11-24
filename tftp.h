@@ -23,6 +23,9 @@
 #define SERV_HOST_ADDR  "127.0.0.1"
 
 #define MAX_TFTP_CLIENTS 100
+#define MAX_TFTP_TIMEOUTS 10
+#define TFTP_TIMEOUT_DURATION 5 //seconds
+
 
 //max packet size
 #define BUFSIZE 2048

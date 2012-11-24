@@ -22,3 +22,11 @@ Alarms/timeouts:
     After 10 CONSECUTIVE retransmissions corresponding to 10 timeouts, your session should gracefully terminate.
 
 
+TODO: Support only simple filenames
+
+
+On the other hand, duplicate messages are handled in an asymmetric manner.
+When you receive a duplicate data message, you must retransmit the last ACK
+message, but when you receive a duplicate ACK message do not retransmit the last
+DATA message, to avoid the sorcerer's apprentice bug.
+'
