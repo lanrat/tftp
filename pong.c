@@ -1,6 +1,9 @@
 #include "pong.h"
 
 
+#define TIMEOUT_TIME 5
+volatile int timesup = 0;
+
 //returns the handle to a socket on the given port
 //if the port is 0 then the OS will pick an avaible port
 int createUDPSocketAndBind(int port)
@@ -110,5 +113,22 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
   n = serializePacket(&packet,buffer);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
+}
+
+void handler(int sig)
+{
+  timesup = 1;
+  alarm(0);
+}
+
+bool waiting()
+{
+
+  signal(SIGALRM, handler);
+  alarm(time);
+  do{
+    recvfrom
+  }while(!timesup);
+  return 1;
 }
 

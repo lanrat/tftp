@@ -20,4 +20,8 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber);
 
 bool send_error(int sockfd, struct sockaddr* sockInfo, u_int16_t errorCode, char* error_message);
 
+bool waiting(int sockfd, struct sockaddr_in* sockInfo, u_int16_t expectedOp);
+
+void handler(int sig);
+
 #endif

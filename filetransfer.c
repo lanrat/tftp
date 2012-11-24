@@ -42,6 +42,40 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, int fileh)
 /* This function recieves a file from a remote host client or server */
 bool recvFile(int sockfd, struct sockaddr* cli_addr, int fileh)
 {
+  PACKET packet;
+  char buffer[BUFSIZE];
+  size_t n;
+  
+  //currently without timeouts
+
+  //TODO fix and add a waiting function that the pseudo code is in pong.c
+  //does NOT currently work how I want it to
+  //IAN! I need to get back to this but I will not be able to very soon.
+  //I am going home tonight. 11/21/12
+  do{
+    n = recvfrom(sockfd, buffer, BUFSIZE, 0, NULL, NULL);
+    unserializePacket(buffer, n, &packet);
+    //Receive an ERROR
+    if(packet.optcode == 5)
+    {
+      printf("Error packet received");
+    }
+    //Receive a DATA packet
+    else if(packet.optcode == 3)
+    {
+      if(fputs(packet.data.data, fileh))
+      {
+        send_ack(sockfd, cli_addr, packet.data.blockNumber);
+      }
+      else 
+      {
+        send_error(sockfd, cli_addr, 0,
+            "Was not able to write data in data packet to file.\n");
+        return false;
+      }
+    }
+  } while(n != 0);
+  return true;
   //sudo code
   //while we recieve more data packets: (check for errors recieved)
   //  if timeout:
@@ -59,5 +93,4 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, int fileh)
   //     send error
   //     return false
   //return true
-  return false;
 }
