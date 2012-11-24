@@ -1,7 +1,12 @@
 #include "pong.h"
 
 
+<<<<<<< HEAD
 volatile int timesup = 0;
+=======
+#define TIMEOUT_TIME 5 //max wait time for timeout
+volatile int timesup = 0; //timeout flag
+>>>>>>> 3c3c369680a64cf2031c79142cd02e63286383e8
 
 //returns the handle to a socket on the given port
 //if the port is 0 then the OS will pick an avaible port
@@ -114,22 +119,42 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
 
+<<<<<<< HEAD
 
 //TODO verify
+=======
+// THIS CODE IS FOR TIMEOUTS!
+>>>>>>> 3c3c369680a64cf2031c79142cd02e63286383e8
 void handler(int sig)
 {
   timesup = 1;
   alarm(0);
 }
 
-bool waiting()
+
+//waiting(): recv's a packet or times out. If a packet is received, the op variable
+//is set to the optcode of the packet received (to be compaired to 
+//optcode expected in the function that called it) 
+
+bool waiting(int sockfd, struct sockaddr* cli_addr,
+                 u_int16_t *optcode, char * buffer[], PACKET* packet)
 {
+  char buffer[BUFSIZE];
+  size_t n;
 
   signal(SIGALRM, handler);
-  alarm(time);
-  do{
-    recvfrom
-  }while(!timesup);
-  return 1;
-}
+  alarm(TIMEOUT_TIME);
 
+  n = recvfrom(sockfd, buffer, BUFSIZE, &cli_addr, sizeof(struct sockaddr));
+  unserializePacket(buffer, n, &packet);
+  optcode = packet.optcode;
+
+  if(timesup)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}

@@ -24,6 +24,10 @@
 #define TFTP_ERRCODE_FILE_ALREADY_EXISTS 6
 #define TFTP_ERRCODE_NO_SUCH_USER        7
 
+//Timeouts
+#define MAX_TIMEOUTS    10
+
+
 
 typedef struct {
     char filename[MAX_STRING_SIZE+1];
