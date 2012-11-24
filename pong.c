@@ -124,37 +124,29 @@ void handler(int sig)
 }
 
 
- 
-
-bool waitforpacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACKET* packet)
+//3 possible outcomes
+//timeout: retrn -1
+//got desired packet: size of pakcket returned
+//error recieved: 0
+int waitforpacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACKET* packet)
 {
   char buffer[BUFSIZE];
   size_t n;
   size_t cli_size = sizeof(cli_addr);
 
- // signal(SIGALRM, handler);
- // alarm(TIMEOUT_TIME);
+  //signal(SIGALRM, handler);
+  //alarm(TIMEOUT_TIME);
 
   do{
     n = recvfrom(sockfd, buffer, BUFSIZE, 0, cli_addr, (socklen_t *)&cli_size);
     unserializePacket(buffer, n, packet);
-    if (optcode == packet->optcode)
+    if (packet->optcode == optcode)
     {
-      return 0;
+      return true;
     }
     else if(packet->optcode == TFTP_OPTCODE_ERR)
     {
-      return -1;
+      return false;
     }
   } while(n = MAX_DATA_SIZE);
-  /*
-  if(timesup)
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-  */
 }
