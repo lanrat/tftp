@@ -1,7 +1,6 @@
 //#include "pong.h"
 #include "tftp.h"
 
-volatile int timesup = 0; //timeout flag
 
 //returns the handle to a socket on the given port
 //if the port is 0 then the OS will pick an avaible port
@@ -119,7 +118,6 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
 // THIS CODE IS FOR TIMEOUTS!
 void handler(int sig)
 {
-  timesup = 1;
   alarm(0);
 }
 
@@ -134,19 +132,25 @@ int waitforpacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
   size_t n;
   size_t cli_size = sizeof(cli_addr);
 
-  //signal(SIGALRM, handler);
-  //alarm(TIMEOUT_TIME);
+  signal(SIGALRM, handler);
+  t = alarm(TIMEOUT_TIME);
 
   do{
     n = recvfrom(sockfd, buffer, BUFSIZE, 0, cli_addr, (socklen_t *)&cli_size);
     unserializePacket(buffer, n, packet);
     if (packet->optcode == optcode)
     {
-      return true;
+      alarm(0);
+      return n;
     }
     else if(packet->optcode == TFTP_OPTCODE_ERR)
     {
-      return false;
+      alarm(0);
+      return 0;
     }
-  } while(n = MAX_DATA_SIZE);
+  } while(true);
+
+  //will only exit while loop if there had been a timeout that stopped the loop
+  alarm(0);
+  return (-1);
 }
