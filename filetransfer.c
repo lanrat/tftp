@@ -71,13 +71,12 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //     return false
   //return true
   PACKET packet;
-  int op = TFTP_OPTCODE_DATA;
-  int isItAGodDamnPacketOrNot;
-  int timeout_counter = 0;
+  int result;
+  unsigned int timeout_counter = 0;
 
   do{
-      isItAGodDamnPacketOrNot = waitForPacket(sockfd, cli_addr, op, &packet);
-      if(isItAGodDamnPacketOrNot == -1)     //timeout
+      result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_DATA, &packet);
+      if(result == -1)     //timeout
       {
         if(timeout_counter < MAX_TFTP_TIMEOUTS)
         {
@@ -85,30 +84,35 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
         else
         {
-          //call error handler
+          send_error(sockfd, cli_addr, 0, "Reached 10 timeouts.\n");
           return false; 
         }
                             
       }
-      else if(isItAGodDamnPacketOrNot == 0) //error
+      else if(result == 0) //result == 0
       {
-        //call error handler
-        return false;
+        if(packet.optcode == TFTP_OPTCODE_ERR)
+        {
+          //error handler
+          return false;
+        }
+
+        //if not an error packet, return 
+        
       }
       else                                  //correct packet
       {
-        if(fwrite(packet.data.data, 1, isItAGodDamnPacketOrNot, fileh))
+        if(fwrite(packet.data.data, 1, result, fileh))
         {
           send_ack(sockfd, cli_addr, packet.data.blockNumber);
         }
         else 
         {
-          send_error(sockfd, cli_addr, 0,
-              "Was not able to write data in data packet to file.\n");
+          send_error(sockfd, cli_addr, 0, "Did not write to file.\n");
           return false;
         }
       }
-  } while(isItAGodDamnPacketOrNot == MAX_DATA_SIZE);
+  } while(result == MAX_DATA_SIZE);
   //} while(n != 0);
 
   return true;

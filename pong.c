@@ -125,7 +125,7 @@ void handler(int sig)
 
 //3 possible outcomes
 //timeout: retrn -1
-//got desired packet: size of pakcket returned
+//got desired packet: size of packet returned
 //error recieved: 0
 int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACKET* packet)
 {
