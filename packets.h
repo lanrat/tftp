@@ -1,8 +1,6 @@
 #ifndef PACKETS_H
 #define PACKETS_H
 
-#include "tftp.h"
-
 #define MAX_STRING_SIZE 1024
 #define MAX_MODE_SIZE 8
 #define MAX_DATA_SIZE 512

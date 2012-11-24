@@ -1,4 +1,5 @@
-#include "pong.h"
+//#include "pong.h"
+#include "tftp.h"
 
 volatile int timesup = 0; //timeout flag
 

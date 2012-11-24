@@ -1,4 +1,5 @@
-#include "packets.h"
+//#include "packets.h"
+#include "tftp.h"
 
 /* 
  * this function will return the appropriate packet struct given a buffer 

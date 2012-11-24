@@ -1,4 +1,5 @@
-#include "filetransfer.h"
+//#include "filetransfer.h"
+#include "tftp.h"
 
 /* how use use these functions
    File handles should be opened and checked before any calls

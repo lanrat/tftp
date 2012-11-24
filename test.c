@@ -1,4 +1,5 @@
-#include "test.h"
+//#include "test.h"
+#include "tftp.h"
 
 void printBuff(void* buff, unsigned int size)
 {

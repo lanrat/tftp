@@ -1,4 +1,5 @@
-#include "common.h"
+//#include "common.h"
+#include "tftp.h"
 
 
 /* prbly very similar to strncpy but returns the size of the string copied */
