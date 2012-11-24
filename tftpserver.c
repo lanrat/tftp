@@ -8,7 +8,8 @@ bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
     bool result;
     //TOOD open file handle
 
-    result = send_ack(sockfd,cli_addr,0);
+    //result = send_ack(sockfd,cli_addr,0);
+    result = send_error(sockfd,cli_addr,TFTP_ERRCODE_NO_SUCH_USER,"Hello World");
     if (!result)
     {
       return false;

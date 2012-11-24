@@ -24,7 +24,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, int fileh)
 {
   //sudo-code
   //while there is data left to send:
-  //  send a data pacekt
+  //  send a data packet
   //  wait for ack, check for error recieved
   //    if timeout:
   //      if timeout_counter > max_timeouts:
