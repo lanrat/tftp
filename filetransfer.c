@@ -108,7 +108,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
           return false;
         }
       }
-  } while(isItAGodDamnPacketOrNot = MAX_DATA_SIZE);
+  } while(isItAGodDamnPacketOrNot == MAX_DATA_SIZE);
   //} while(n != 0);
 
   return true;
