@@ -67,7 +67,8 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
       //check for error
       if (packet->optcode == TFTP_OPTCODE_ERR)
       {
-        //TODO call errorhandler
+        //call the error handler
+        printError(packet);
         return false;
       }
       timeout_counter = 0;
@@ -120,7 +121,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
           send_error(sockfd, cli_addr, 0, "Reached 10 timeouts.\n");
           return false; 
         }
-                            
+
       }
       else if(result == 0) //result == 0
       {
@@ -131,9 +132,9 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
 
         //if not an error packet, return 
-        
+
       }
-      else                                  //correct packet
+      else //correct packet
       {
         if(fwrite(packet.data.data, 1, result, fileh))
         {
@@ -146,7 +147,6 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
       }
   } while(result == MAX_DATA_SIZE);
-  //} while(n != 0);
 
   return true;
 }
