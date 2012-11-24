@@ -26,6 +26,8 @@
 #define MAX_TFTP_TIMEOUTS 10
 #define TFTP_TIMEOUT_DURATION 5 //seconds
 
+//we ontl support octet mode
+#define TFTP_SUPORTED_MODE "octet"
 
 //max packet size
 #define BUFSIZE 2048

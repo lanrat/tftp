@@ -3,18 +3,64 @@
 //used for counting the number of children procs
 static unsigned int childCount = 0;
 
+bool server_send(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
+{
+  FILE* fileh;
+  
+  //we only support octet mode
+  if (strncmp(packet->read_request.mode,TFTP_SUPORTED_MODE,MAX_MODE_SIZE) != 0)
+  {
+    //unsuported mode
+    send_error(sockfd,cli_addr,TFTP_ERRCODE_ILLEGAL_OPERATION,"Only octet mode is supported");
+    return false;
+  }
+
+  fileh = fopen(packet->read_request.filename,"rb");
+
+  //check for file errors
+  if (fileh == NULL)
+  {
+    //TODO check for specific errors
+    //TODO TFTP_ERRCODE_ACCESS_VIOLATION
+    //TODO TFTP_ERRCODE_FILE_NOT_FOUND
+    send_error(sockfd,cli_addr,TFTP_ERRCODE_FILE_NOT_FOUND,"Unable to open file for writing");
+    return false;
+  }
+
+  return sendFile(sockfd,cli_addr,fileh);
+}
+
 bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
 {
-    bool result;
-    //TOOD open file handle
+    FILE* fileh;
 
-    //result = send_ack(sockfd,cli_addr,0);
-    result = send_error(sockfd,cli_addr,TFTP_ERRCODE_NO_SUCH_USER,"Hello World");
-    if (!result)
+    //we only support octet mode
+    if (strncmp(packet->write_request.mode,TFTP_SUPORTED_MODE,MAX_MODE_SIZE) != 0)
     {
+      //unsuported mode
+      send_error(sockfd,cli_addr,TFTP_ERRCODE_ILLEGAL_OPERATION,"Only octet mode is supported");
       return false;
     }
-    //return recvFile(sockfd,cli_addr,0);
+    
+    //open file handle
+    fileh = fopen(packet->write_request.filename,"wb");
+
+    //check for file errors
+    if (fileh == NULL)
+    {
+      //TODO check for specific errors
+      //TODO support TFTP_ERRCODE_DISK_FULL
+      //TODO TFTP_ERRCODE_ACCESS_VIOLATION
+      //TODO TFTP_ERRCODE_DISK_FULL
+      // more?
+      send_error(sockfd,cli_addr,TFTP_ERRCODE_ACCESS_VIOLATION,"Unable to open file for writing");
+      return false;
+    }
+
+    //send ack
+    send_ack(sockfd,cli_addr,0);
+    
+    return recvFile(sockfd,cli_addr,fileh);
 }
 
 void run_child(struct sockaddr cli_addr, PACKET * packet)
