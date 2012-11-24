@@ -82,7 +82,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //IAN! I need to get back to this but I will not be able to very soon.
   //I am going home tonight. 11/21/12
   do{
-      timeoutORerrorflag = waitforpacket(sockfd, cli_addr, op, &packet);
+      timeoutORerrorflag = waitForPacket(sockfd, cli_addr, op, &packet);
       //Receive an ERROR
      if(timeoutORerrorflag == -1)
       {
