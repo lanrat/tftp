@@ -14,7 +14,7 @@ bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
     {
       return false;
     }
-    return recvFile(sockfd,cli_addr,0);
+    //return recvFile(sockfd,cli_addr,0);
 }
 
 void run_child(struct sockaddr cli_addr, PACKET * packet)
