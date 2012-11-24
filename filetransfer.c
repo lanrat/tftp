@@ -39,6 +39,9 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   u_int16_t blockNumber = 0;
   char buffer[MAX_DATA_SIZE];
   size_t n;
+  int result;
+  PACKET packet;
+  unsigned int timeout_counter;
 
   do
   {
@@ -60,14 +63,14 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
     }else
     {
       //check for error
-      if (packet->optcode == TFTP_OPTCODE_ERR)
+      if (packet.optcode == TFTP_OPTCODE_ERR)
       {
         //call the error handler
-        printError(packet);
+        printError(&packet);
         return false;
       }
       //check the ack recieved was for the correct blcok number
-      if (packet->ack.blockNumber != blockNumber)
+      if (packet.ack.blockNumber != blockNumber)
       {
         send_error(sockfd,cli_addr,TFTP_ERRCODE_UNKNOWN_TRANSFER_ID,"Incorect Block Number");
         return false;
@@ -110,16 +113,11 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
 
       }
-      else if(result == 0) //result == 0
+      else if(packet.optcode == TFTP_OPTCODE_ERR)
       {
-        if(packet.optcode == TFTP_OPTCODE_ERR)
-        {
-          //error handler
-          return false;
-        }
-
-        //if not an error packet, return 
-        return true;
+        //error handler
+        printError(&packet);
+        return false;
       }
       else //correct packet
       {
@@ -140,7 +138,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
         else
         {
-            send_error(sockfd, cli_addr, 0, "Incorrect packet recieved.\n")
+            send_error(sockfd, cli_addr, 0, "Incorrect packet recieved.\n");
         }
       } 
   } while(result == MAX_DATA_SIZE);

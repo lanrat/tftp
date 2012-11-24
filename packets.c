@@ -166,7 +166,7 @@ void printError(PACKET * packet)
     return;
   }
   printf("Error recieved with CODE: [");
-  switch (packet->error.errorcode)
+  switch (packet->error.errorCode)
   {
     case TFTP_ERRCODE_UNDEFINED:
       printf("Undefined");
@@ -193,7 +193,7 @@ void printError(PACKET * packet)
       printf("Illegal Operation");
       break;
     default:
-      printf("%u",packet->errorcode);
+      printf("%u",packet->error.errorCode);
       break;
   }
   printf("] Message: %s\n",packet->error.message);
