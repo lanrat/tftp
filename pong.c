@@ -1,12 +1,6 @@
 #include "pong.h"
 
-
-<<<<<<< HEAD
-volatile int timesup = 0;
-=======
-#define TIMEOUT_TIME 5 //max wait time for timeout
 volatile int timesup = 0; //timeout flag
->>>>>>> 3c3c369680a64cf2031c79142cd02e63286383e8
 
 //returns the handle to a socket on the given port
 //if the port is 0 then the OS will pick an avaible port
@@ -119,12 +113,9 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
 
-<<<<<<< HEAD
 
 //TODO verify
-=======
 // THIS CODE IS FOR TIMEOUTS!
->>>>>>> 3c3c369680a64cf2031c79142cd02e63286383e8
 void handler(int sig)
 {
   timesup = 1;
@@ -136,7 +127,7 @@ void handler(int sig)
 //is set to the optcode of the packet received (to be compaired to 
 //optcode expected in the function that called it) 
 
-bool waiting(int sockfd, struct sockaddr* cli_addr,
+/*bool waiting(int sockfd, struct sockaddr* cli_addr,
                  u_int16_t *optcode, char * buffer[], PACKET* packet)
 {
   char buffer[BUFSIZE];
@@ -157,4 +148,4 @@ bool waiting(int sockfd, struct sockaddr* cli_addr,
   {
     return 0;
   }
-}
+}*/

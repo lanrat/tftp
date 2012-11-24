@@ -20,7 +20,7 @@
 
 
 /* This function sends a file to a remote host client or server */
-bool sendFile(int sockfd, struct sockaddr* cli_addr, int fileh)
+bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
   //sudo-code
   //while there is data left to send:
@@ -40,7 +40,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, int fileh)
 
 
 /* This function recieves a file from a remote host client or server */
-bool recvFile(int sockfd, struct sockaddr* cli_addr, int fileh)
+bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
   PACKET packet;
   int timeoutflag = 0;
@@ -53,9 +53,9 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, int fileh)
   //IAN! I need to get back to this but I will not be able to very soon.
   //I am going home tonight. 11/21/12
   do{
-    timeoutflag = waiting(sockfd, cli_addr, &op, &buffer, &packet);
+    //timeoutflag = waiting(sockfd, cli_addr, &op, &buffer, &packet);
     if(!timeoutflag)
-      unserializePacket(buffer, n, &packet);
+      //unserializePacket(buffer, n, &packet);
 
       //Receive an ERROR
       if(op == 5)
@@ -76,7 +76,9 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, int fileh)
         return false;
       }
     }
-  } while(n != 0);
+  } while(false);
+  //} while(n != 0);
+
   return true;
   //sudo code
   //while we recieve more data packets: (check for errors recieved)

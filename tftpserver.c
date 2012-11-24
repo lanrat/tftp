@@ -47,7 +47,7 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
 
   if (result == false)
   {
-    printf("Failed to handle client resuest\n");
+    printf("Failed to handle client request\n");
   }
 }
 
