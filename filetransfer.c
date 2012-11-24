@@ -35,6 +35,17 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //        resend data
   //    reset timeout_counter
   //return true
+
+  u_int16_t blockNumber = 0;
+  char buffer[MAX_DATA_SIZE];
+  size_t n;
+
+  do
+  {
+    n = fread(buffer,1,MAX_DATA_SIZE,fileh);
+    send_data(sockfd, cli_addr, blockNumber,buffer,n);
+  } while (n == MAX_DATA_SIZE);
+
   return false;
 }
 
