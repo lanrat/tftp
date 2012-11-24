@@ -72,26 +72,32 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //return true
   PACKET packet;
   int op = TFTP_OPTCODE_DATA;
-  int timeoutORerrorflag;
-  size_t n;
-  
-  //currently without timeouts
+  int isItAGodDamnPacketOrNot;
+  int timeout_counter = 0;
 
-  //TODO fix and add a waiting function that the pseudo code is in pong.c
-  //does NOT currently work how I want it to
-  //IAN! I need to get back to this but I will not be able to very soon.
-  //I am going home tonight. 11/21/12
   do{
-      timeoutORerrorflag = waitForPacket(sockfd, cli_addr, op, &packet);
-      //Receive an ERROR
-     if(timeoutORerrorflag == -1)
+      isItAGodDamnPacketOrNot = waitForPacket(sockfd, cli_addr, op, &packet);
+      if(isItAGodDamnPacketOrNot == -1)     //timeout
       {
+        if(timeout_counter < MAX_TFTP_TIMEOUTS)
+        {
+          timeout_counter++;
+        }
+        else
+        {
+          //call error handler
+          return false; 
+        }
+                            
+      }
+      else if(isItAGodDamnPacketOrNot == 0) //error
+      {
+        //call error handler
         return false;
       }
-      //Receive a DATA packet
-      else
+      else                                  //correct packet
       {
-        if(fputs(packet.data.data, fileh))
+        if(fwrite(packet.data.data, 1, isItAGodDamnPacketOrNot, fileh))
         {
           send_ack(sockfd, cli_addr, packet.data.blockNumber);
         }
@@ -102,7 +108,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
           return false;
         }
       }
-  } while(packet.data.dataSize = MAX_DATA_SIZE);
+  } while(isItAGodDamnPacketOrNot = MAX_DATA_SIZE);
   //} while(n != 0);
 
   return true;
