@@ -1,7 +1,6 @@
 #include "pong.h"
 
 
-#define TIMEOUT_TIME 5
 volatile int timesup = 0;
 
 //returns the handle to a socket on the given port
@@ -115,6 +114,8 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
 
+
+//TODO verify
 void handler(int sig)
 {
   timesup = 1;
