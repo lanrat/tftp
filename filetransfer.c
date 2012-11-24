@@ -19,7 +19,6 @@
 
  */
 
-
 /* This function sends a file to a remote host client or server */
 bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
@@ -54,6 +53,23 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 /* This function recieves a file from a remote host client or server */
 bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
+  //sudo code
+  //while we recieve more data packets: (check for errors recieved)
+  //  if timeout:
+  //    if timeout_counter > max_timeouts:
+  //      send error
+  //      return false
+  //    increase timeout_counter
+  //    resend ack
+  //  else:
+  //    reset timeout_counter
+  //    write the data to a file
+  //    if successful:
+  //      send ack
+  //    else:
+  //     send error
+  //     return false
+  //return true
   PACKET packet;
   int op = TFTP_OPTCODE_DATA;
   int timeoutORerrorflag;
@@ -90,21 +106,4 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //} while(n != 0);
 
   return true;
-  //sudo code
-  //while we recieve more data packets: (check for errors recieved)
-  //  if timeout:
-  //    if timeout_counter > max_timeouts:
-  //      send error
-  //      return false
-  //    increase timeout_counter
-  //    resend ack
-  //  else:
-  //    reset timeout_counter
-  //    write the data to a file
-  //    if successful:
-  //      send ack
-  //    else:
-  //     send error
-  //     return false
-  //return true
 }
