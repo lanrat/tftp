@@ -11,6 +11,10 @@
 #include <string.h>
 #include <errno.h>
 
+typedef int bool;
+#define true 1
+#define false 0
+
 #include "packets.h"
 #include "test.h"
 #include "common.h"

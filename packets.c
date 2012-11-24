@@ -1,4 +1,3 @@
-//#include "packets.h"
 #include "tftp.h"
 
 /* 

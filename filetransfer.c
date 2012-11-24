@@ -71,6 +71,13 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         printError(packet);
         return false;
       }
+      //check the ack recieved was for the correct blcok number
+      if (packet->ack.blockNumber != blockNumber)
+      {
+        send_error(sockfd,cli_addr,TFTP_ERRCODE_UNKNOWN_TRANSFER_ID,"Incorect Block Number");
+        return false;
+      }
+
       timeout_counter = 0;
 
       if (n > 0){
