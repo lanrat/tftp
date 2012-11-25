@@ -104,6 +104,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 
   do{
       result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_DATA, &packet);
+      printf("Left waitForPacket\n");
       if(result == -1)     //timeout
       {
         if(timeout_counter < MAX_TFTP_TIMEOUTS)
