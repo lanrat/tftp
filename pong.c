@@ -126,7 +126,7 @@ void handler(int sig)
 
 
 //3 possible outcomes
-//timeout: retrn -1
+//timeout or other error: retrn -1
 //got desired packet: size of packet returned
 //error recieved: 0
 int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACKET* packet)
@@ -143,9 +143,14 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
     if (DEBUG) printf("waiting for response..");
     n = recvfrom(sockfd, buffer, BUFSIZE, 0, cli_addr, (socklen_t *)&cli_size);
     if (DEBUG) printf("done\n");
-    unserializePacket(buffer, n, packet);
+    if (unserializePacket(buffer, n, packet) == NULL)
+    {
+      return -1;
+    }
+    printf("unserialized %lu bytes received\n", n);
     if (packet->optcode == optcode)
     {
+      printf("Received correct packet\n");
       alarm(0);
       return n;
     }

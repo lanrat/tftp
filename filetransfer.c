@@ -128,25 +128,30 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
       {
         //check for correct blocknumber
         //A: Correct
+        printf("Blocknumber: %u\n",packet.data.blockNumber);
+        if (DEBUG) printPacket(&packet);
         if(packet.data.blockNumber == expected_block_number)
         {
-          if(fwrite(packet.data.data, 1, result, fileh))
+          if(fwrite(packet.data.data, 1, packet.data.dataSize, fileh))
           {
+            printf("wrote to file\n");
             expected_block_number++;
-            send_ack(sockfd, cli_addr, packet.data.blockNumber);
           }
-          else 
+          else if(packet.data.dataSize != 0)
           {
-            send_error(sockfd, cli_addr, 0, "Did not write to file.\n");
+            send_error(sockfd, cli_addr, 0, "Did not write to file.");
             return false;
           }
+          send_ack(sockfd, cli_addr, packet.data.blockNumber);
         }
         else
         {
-            send_error(sockfd, cli_addr, 0, "Incorrect packet recieved.\n");
+            send_error(sockfd, cli_addr, 0, "Incorrect packet recieved.");
+            return false;
         }
-      } 
-  } while(result == MAX_DATA_SIZE);
-
+      }
+      printf("result: %d\n", result);
+  } while(packet.data.dataSize == MAX_DATA_SIZE);
+  printf("returning");
   return true;
 }

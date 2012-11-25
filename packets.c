@@ -15,7 +15,7 @@ PACKET * unserializePacket(char * buffer, size_t bufferSize, PACKET* packet)
 
   if (packet == NULL)
   {
-    packet = malloc(sizeof(PACKET));
+    return NULL;
   }
   bzero(packet,sizeof(PACKET));
   packet->optcode = getHostOrderShortFromNetwork(buffer);
@@ -34,12 +34,6 @@ PACKET * unserializePacket(char * buffer, size_t bufferSize, PACKET* packet)
       charncpy(packet->write_request.mode,dataOffset,MAX_MODE_SIZE);
       break;
     case TFTP_OPTCODE_DATA: //data
-      if (bufferSize > MAX_DATA_SIZE)
-      {
-        //ERROR, got more data than allowed
-        free(packet);
-        return NULL;
-      }
       packet->data.blockNumber = getHostOrderShortFromNetwork(dataOffset);
       dataOffset +=2;
       packet->data.dataSize = (bufferSize-(2*sizeof(u_int16_t)));
