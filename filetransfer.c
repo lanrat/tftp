@@ -22,7 +22,6 @@
 /* This function sends a file to a remote host client or server */
 bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
-
   if (DEBUG) printf("Sending File\n");
   //sudo-code
   //while there is data left to send:
@@ -45,10 +44,10 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   PACKET packet;
   unsigned int timeout_counter;
 
-  n = fread(buffer,1,MAX_DATA_SIZE,fileh);
-
   do
   {
+    n = fread(buffer,1,MAX_DATA_SIZE,fileh);
+
     if (DEBUG) printf("Sending Data..");
     if (!send_data(sockfd, cli_addr, blockNumber,buffer,n))
     {
@@ -87,15 +86,10 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 
       blockNumber++;
       timeout_counter = 0;
-
-      if (n > 0){
-        //send the next chunk of data to the recivever
-        n = fread(buffer,1,MAX_DATA_SIZE,fileh);
-      }
     }
   } while (n == MAX_DATA_SIZE);
 
-  return false;
+  return true;
 }
 
 

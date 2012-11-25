@@ -73,16 +73,13 @@ bool send_data(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber, cha
   char buffer[BUFSIZE];
   size_t n;
 
-  if (DEBUG) printf("Sending %lu bytes cof data\n",data_size);
-
   packet.optcode = TFTP_OPTCODE_DATA;
   packet.data.blockNumber = blockNumber;
   packet.data.dataSize = data_size;
-  charncpy(packet.data.data,data,data_size);
+  //charncpy(packet.data.data,data,data_size);
+  memcpy(packet.data.data,data,data_size);
 
   n = serializePacket(&packet,buffer);
-  
-  if (DEBUG) printf("serialized %lu bytes of data\n",n);
   
   return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
@@ -139,11 +136,8 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
   size_t cli_size = sizeof(cli_addr);
   timeout = false;
 
-  if (DEBUG) printf("herp\n");
   signal(SIGALRM, handler);
-  if (DEBUG) printf("derp\n");
   alarm(TFTP_TIMEOUT_DURATION);
-  if (DEBUG) printf("derpster\n");
 
   do{
     if (DEBUG) printf("waiting for response..");

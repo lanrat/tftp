@@ -89,13 +89,10 @@ size_t serializePacket(const PACKET* packet, char * buffer)
       n += charncpy(dataOffset,packet->read_request.mode,MAX_MODE_SIZE);
       break;
    case TFTP_OPTCODE_DATA: //data
-      if (DEBUG) printf("trying to send data block of size: %u\n",packet->data.dataSize);
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->data.blockNumber,NULL);
       dataOffset +=2; //skip over block number
       memcpy(dataOffset,packet->data.data,packet->data.dataSize);
-      if (DEBUG) printf("n4:: %lu\n",n);
       n += (packet->data.dataSize + 2); //add room for the block number
-      if (DEBUG) printf("n5:: %lu\n",n);
       break;
     case TFTP_OPTCODE_ACK: //ack
       *((u_int16_t*)dataOffset) = getNetworkOrderShortFromHost(packet->ack.blockNumber,NULL);
