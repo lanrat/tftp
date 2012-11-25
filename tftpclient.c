@@ -1,65 +1,62 @@
 #include "tftp.h"
-#include "packets.h"
-#include "pong.h"
 
 
-void send_packet(int sockfd, struct sockaddr* pserv_addr)
-{
-  char[] messge = "Hello World!";
-  int n = sizeof(message);
-}
+
 
 //
 int main(int argc, char *argv[])
 {
-  //used for error messages
-  progname = argv[0];
   int sockfd;
+  int result;
+  PACKET packet;
 
-  
-  struct sockaddr_in      cli_addr, serv_addr;
+  struct sockaddr_in      serv_addr;
 
-  if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-  {
-    printf("%s: can't open datagram socket\n",progname);
-    exit(1);
-  }
-
-  //set some struct args
-  bzero((char *) &cli_addr, sizeof(cli_addr));
+  bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family      = AF_INET;
+
   serv_addr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR);
   serv_addr.sin_port        = htons(SERV_UDP_PORT);
 
-  //setup the client struct
-  bzero((char *) &cli_addr, sizeof(cli_addr));
-  cli_addr.sin_family      = AF_INET;
-  cli_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  cli_addr.sin_port        = htons(0);
+  FILE * file;
+  file = fopen(argv[2], "rb");
 
-  if (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0)
+  if(file == NULL)
   {
-     printf("%s: can't bind local address\n",progname);
-     exit(1);
+    //handle error
+    return;
   }
+  
+  sockfd = createUDPSocketAndBind(0);
+  if(sockfd == -1)
+  {
+    //handle error
+    return;
+  }
+  
 
 
   if(argv[1][0] == '-')
   {
+
     switch(argv[1][1])
     {
-      case 'r':
-        recvfile(argv[2]);
-        break;
       case 'w':
-        sendfile(argv[2]);
+        send_WRQ(sockfd, (struct sockaddr *) &serv_addr, argv[2], TFTP_SUPORTED_MODE);
+        result = waitForPacket(sockfd, (struct sockaddr *) &serv_addr, TFTP_OPTCODE_ACK, &packet);
+        if(result > 0) sendFile(sockfd, (struct sockaddr *) &serv_addr, file);
         break;
-      case default: 
+      case 'r':
+        send_RRQ(sockfd, (struct sockaddr *) &serv_addr, argv[2], TFTP_SUPORTED_MODE);
+        recvFile(sockfd, (struct sockaddr *) &serv_addr, file);
+        break;
+      default: 
         printf("Not a valid action \n");
         break;
     }
 
   }
+  fclose(file);
   //ready for packet magic here!
 
 }
