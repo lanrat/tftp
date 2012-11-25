@@ -73,14 +73,18 @@ bool send_data(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber, cha
   char buffer[BUFSIZE];
   size_t n;
 
+  if (DEBUG) printf("Sending %lu bytes cof data\n",data_size);
+
   packet.optcode = TFTP_OPTCODE_DATA;
   packet.data.blockNumber = blockNumber;
   packet.data.dataSize = data_size;
   charncpy(packet.data.data,data,data_size);
-  
+
   n = serializePacket(&packet,buffer);
   
-  return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr*)) >= 0);
+  if (DEBUG) printf("serialized %lu bytes of data\n",n);
+  
+  return (sendto(sockfd,buffer,n,0,(struct sockaddr *)sockInfo,sizeof(struct sockaddr)) >= 0);
 }
 
 //sends the arror message to the socket with the provided errorcode and message

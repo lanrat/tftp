@@ -38,7 +38,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   //    reset timeout_counter
   //return true
 
-  u_int16_t blockNumber = 0;
+  u_int16_t blockNumber = 1;
   char buffer[MAX_DATA_SIZE];
   size_t n;
   int result;
@@ -50,7 +50,10 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   do
   {
     if (DEBUG) printf("Sending Data..");
-    send_data(sockfd, cli_addr, blockNumber,buffer,n);
+    if (!send_data(sockfd, cli_addr, blockNumber,buffer,n))
+    {
+      return false;
+    }
     if (DEBUG) printf("Sent\n");
 
     //wait for ack
@@ -82,6 +85,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         return false;
       }
 
+      blockNumber++;
       timeout_counter = 0;
 
       if (n > 0){
