@@ -79,9 +79,7 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
   switch (packet->optcode)
   {
     case TFTP_OPTCODE_RRQ:
-      //TODO handle some stuff
-      //make a call to sendfile()
-      result = false;
+      result = server_send(child_sockfd,&cli_addr,packet);
       break;
     case TFTP_OPTCODE_WRQ:
       result = server_recieve(child_sockfd,&cli_addr,packet);

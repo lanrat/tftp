@@ -119,6 +119,7 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
 void handler(int sig)
 {
   timeout = true;
+  printf("Handler Reached\n");
   alarm(0);
 }
 
@@ -134,11 +135,16 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
   size_t cli_size = sizeof(cli_addr);
   timeout = false;
 
+  if (DEBUG) printf("herp\n");
   signal(SIGALRM, handler);
+  if (DEBUG) printf("derp\n");
   alarm(TFTP_TIMEOUT_DURATION);
+  if (DEBUG) printf("derpster\n");
 
   do{
+    if (DEBUG) printf("waiting for response..");
     n = recvfrom(sockfd, buffer, BUFSIZE, 0, cli_addr, (socklen_t *)&cli_size);
+    if (DEBUG) printf("done\n");
     unserializePacket(buffer, n, packet);
     if (packet->optcode == optcode)
     {
