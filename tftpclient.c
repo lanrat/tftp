@@ -42,13 +42,29 @@ int main(int argc, char *argv[])
     switch(argv[1][1])
     {
       case 'w':
-        send_WRQ(sockfd, (struct sockaddr *) &serv_addr, argv[2], TFTP_SUPORTED_MODE);
+        if(!send_WRQ(sockfd, (struct sockaddr *) &serv_addr, argv[2], TFTP_SUPORTED_MODE))
+        {
+           printf("Error: couldn't send RRQ\n");
+           return;
+        }
         result = waitForPacket(sockfd, (struct sockaddr *) &serv_addr, TFTP_OPTCODE_ACK, &packet);
         if(result > 0) sendFile(sockfd, (struct sockaddr *) &serv_addr, file);
+        else
+        {
+          printf("Couldn't sendfile()\n");
+        }
         break;
       case 'r':
-        send_RRQ(sockfd, (struct sockaddr *) &serv_addr, argv[2], TFTP_SUPORTED_MODE);
-        recvFile(sockfd, (struct sockaddr *) &serv_addr, file);
+        if(!send_RRQ(sockfd, (struct sockaddr *) &serv_addr, argv[2], TFTP_SUPORTED_MODE))
+        {
+           printf("Error: couldn't send RRQ\n");
+           return;
+        }
+        if(!recvFile(sockfd, (struct sockaddr *) &serv_addr, file))
+        {
+           printf("Error: didn't receive file\n");
+           return;
+        }
         break;
       default: 
         printf("Not a valid action \n");
