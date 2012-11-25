@@ -5,6 +5,7 @@ volatile bool timeout;
 
 //returns the handle to a socket on the given port
 //if the port is 0 then the OS will pick an avaible port
+
 int createUDPSocketAndBind(int port)
 {
   int sockfd;
