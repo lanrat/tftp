@@ -1,4 +1,3 @@
-//#include "filetransfer.h"
 #include "tftp.h"
 
 /* how use use these functions
@@ -16,7 +15,6 @@
    Server receiving file:
     send ack
     recvfile()
-
  */
 
 /* This function sends a file to a remote host client or server */
@@ -47,7 +45,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   {
     n = fread(buffer,1,MAX_DATA_SIZE,fileh);
 
-    if (DEBUG) printf("Sending Data..");
+    if (DEBUG) printf("Sending Data: [%u] ",blockNumber);
     if (!send_data(sockfd, cli_addr, blockNumber,buffer,n))
     {
       return false;
@@ -56,7 +54,6 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 
     //wait for ack
     result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_ACK,&packet);
-    if (DEBUG) printf("Got response\n");
 
     //check for timeout
     if (result == -1)
@@ -102,7 +99,6 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   unsigned int expected_block_number = 1;
 
   do{
-      if (DEBUG) printf("Waiting for data\n");
       result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_DATA, &packet);
       if(result == -1)     //timeout
       {
@@ -127,7 +123,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
       {
         //check for correct blocknumber
         //A: Correct
-        if (DEBUG) printPacket(&packet);
+        //if (DEBUG) printPacket(&packet);
         if(packet.data.blockNumber == expected_block_number)
         {
           if(fwrite(packet.data.data, 1, packet.data.dataSize, fileh))
@@ -140,7 +136,12 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
             send_error(sockfd, cli_addr, TFTP_ERRCODE_UNDEFINED, "Could not write to file");
             return false;
           }
-          send_ack(sockfd, cli_addr, packet.data.blockNumber);
+          if (DEBUG) printf("Sending Ack: [%u] ",packet.data.blockNumber);
+          if (!send_ack(sockfd, cli_addr, packet.data.blockNumber))
+          {
+            return false;
+          }
+          if (DEBUG) printf("Sent\n");
         }
         else
         {

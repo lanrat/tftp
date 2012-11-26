@@ -44,7 +44,6 @@ void getFile(char *filename)
     printf("Error: couldn't send RRQ\n");
     return;
   }
-  return;
   if(!recvFile(sockfd, (struct sockaddr *) &serv_addr, file))
   {
     printf("Error: didn't receive file\n");
@@ -84,7 +83,6 @@ void putFile(char *filename)
     printf("Error: couldn't send WRQ\n");
     return;
   }
-  return;
   result = waitForPacket(sockfd, (struct sockaddr *) &serv_addr, TFTP_OPTCODE_ACK, &packet);
   if(result > 0) sendFile(sockfd, (struct sockaddr *) &serv_addr, file);
   else
