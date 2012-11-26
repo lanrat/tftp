@@ -20,10 +20,13 @@ bool server_send(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
   //check for file errors
   if (fileh == NULL)
   {
-    //TODO check for specific errors
-    //TODO TFTP_ERRCODE_ACCESS_VIOLATION
-    //TODO TFTP_ERRCODE_FILE_NOT_FOUND
-    send_error(sockfd,cli_addr,TFTP_ERRCODE_FILE_NOT_FOUND,"Unable to open file for writing");
+    if (errno == ENOENT)
+    {
+      //file 404
+      send_error(sockfd,cli_addr,TFTP_ERRCODE_FILE_NOT_FOUND,strerror(errno));
+    }
+    //other cases
+    send_error(sockfd,cli_addr,TFTP_ERRCODE_ACCESS_VIOLATION,strerror(errno));
     return false;
   }
 
@@ -41,19 +44,24 @@ bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
       send_error(sockfd,cli_addr,TFTP_ERRCODE_ILLEGAL_OPERATION,"Only octet mode is supported");
       return false;
     }
-    
+
     //open file handle
     fileh = fopen(packet->write_request.filename,"wb");
 
     //check for file errors
     if (fileh == NULL)
     {
-      //TODO check for specific errors
-      //TODO support TFTP_ERRCODE_DISK_FULL
-      //TODO TFTP_ERRCODE_ACCESS_VIOLATION
-      //TODO TFTP_ERRCODE_DISK_FULL
-      // more?
-      send_error(sockfd,cli_addr,TFTP_ERRCODE_ACCESS_VIOLATION,"Unable to open file for writing");
+      if (errno == ENOMEM)
+      {
+        //disk full
+        send_error(sockfd,cli_addr,TFTP_ERRCODE_DISK_FULL,strerror(errno));
+      }else if (errno == EEXIST)
+      {
+        //file exists
+        send_error(sockfd,cli_addr,TFTP_ERRCODE_FILE_ALREADY_EXISTS,strerror(errno));
+      }
+      //other cases
+      send_error(sockfd,cli_addr,TFTP_ERRCODE_ACCESS_VIOLATION,strerror(errno));
       return false;
     }
 

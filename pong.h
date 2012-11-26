@@ -11,6 +11,8 @@
 
 int createUDPSocketAndBind(int port);
 
+bool send_generic(int sockfd, struct sockaddr* sockInfo, PACKET* packet);
+
 bool send_RRQ(int sockfd, struct sockaddr* sockInfo, char* filename, char* mode);
 bool send_WRQ(int sockfd, struct sockaddr* sockInfo, char* filename, char* mode);
 

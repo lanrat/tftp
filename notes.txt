@@ -1,11 +1,3 @@
-    Error messages
+Support only simple filenames
 
-TODO: Support only simple filenames
-
-On the other hand, duplicate messages are handled in an asymmetric manner.
-When you receive a duplicate data message, you must retransmit the last ACK
-message, but when you receive a duplicate ACK message do not retransmit the last
-DATA message, to avoid the sorcerer's apprentice bug.
-
-    TODO timeouts on inital RRQ and WRQ
-
+Timeouts on inital RRQ and WRQ

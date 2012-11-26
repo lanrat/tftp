@@ -36,7 +36,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 
   u_int16_t blockNumber = 1;
   char buffer[MAX_DATA_SIZE];
-  size_t n;
+  size_t n = MAX_DATA_SIZE; //by default
   int result;
   PACKET packet;
   unsigned int timeout_counter;
@@ -46,6 +46,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
     n = fread(buffer,1,MAX_DATA_SIZE,fileh);
 
     if (DEBUG) printf("Sending Data: [%u] ",blockNumber);
+    //TODO make gerneric
     if (!send_data(sockfd, cli_addr, blockNumber,buffer,n))
     {
       return false;
@@ -104,6 +105,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
     {
       if(timeout_counter < MAX_TFTP_TIMEOUTS)
       {
+        //send gerneric
         timeout_counter++;
       }
       else
@@ -127,13 +129,14 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         {
           blockNumber++;
         }
+        //this check should go first
         else if(packet.data.dataSize != 0)
         {
-          //TODO check for all file errror cases
-          send_error(sockfd, cli_addr, TFTP_ERRCODE_UNDEFINED, "Could not write to file");
+          send_error(sockfd, cli_addr, TFTP_ERRCODE_UNDEFINED, "Got no data to write to file");
           return false;
         }
         if (DEBUG) printf("Sending Ack: [%u] ",packet.data.blockNumber);
+        //this should be mvoed ot of the else to be a genreric send
         if (!send_ack(sockfd, cli_addr, packet.data.blockNumber))
         {
           return false;
@@ -142,8 +145,8 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
       }
       else
       {
-        //TODO fix this logic
         if (DEBUG) printf("Error: expected block [%u] but got [%u]\n",blockNumber,packet.data.blockNumber);
+        //skip over packets left in queue
         if (blockNumber < packet.data.blockNumber)
         {
           send_error(sockfd, cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION, "Wrong block number recieved");

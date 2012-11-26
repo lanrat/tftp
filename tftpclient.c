@@ -21,12 +21,11 @@ void getFile(int port, char *filename)
   struct sockaddr_in serv_addr;
   FILE * file;
 
-  //TODO handle all file errors
   file = fopen(filename, "wb");
 
   if(file == NULL)
   {
-    printf("file is null\n");
+    perror(filename);
     return;
   }
 
@@ -63,10 +62,9 @@ void putFile(int port, char *filename)
   FILE * file;
   file = fopen(filename, "rb");
 
-  //TODO handle file error cases
   if(file == NULL)
   {
-    printf("Unbable to open file\n");
+    perror(filename);
     return;
   }
 
