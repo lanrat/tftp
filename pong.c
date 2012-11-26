@@ -161,7 +161,7 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
       return 0;
     }
   } while(!timeout);
-
+  printf("Noticed Timeout\n");
   //will only exit while loop if there had been a timeout that stopped the loop
   alarm(0);
   return -1;

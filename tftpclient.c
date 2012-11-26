@@ -2,10 +2,10 @@
 
 
 
-void readFile(int sockfd, struct sockaddr_in serv_addr,char *filename)
+void getFile(int sockfd, struct sockaddr_in serv_addr,char *filename)
 { 
   FILE * file;
-  file = fopen(filename, "rb");
+  file = fopen(filename, "wb");
 
   if(file == NULL)
   {
@@ -19,6 +19,7 @@ void readFile(int sockfd, struct sockaddr_in serv_addr,char *filename)
     printf("Error: couldn't send RRQ\n");
     return;
   }
+  return;
   if(!recvFile(sockfd, (struct sockaddr *) &serv_addr, file))
   {
     printf("Error: didn't receive file\n");
@@ -28,12 +29,12 @@ void readFile(int sockfd, struct sockaddr_in serv_addr,char *filename)
   return;
 }
 
-void writeFile(int sockfd, struct sockaddr_in serv_addr, char *filename)
+void putFile(int sockfd, struct sockaddr_in serv_addr, char *filename)
 {
   PACKET packet;
   int result;
   FILE * file;
-  file = fopen(filename, "wb");
+  file = fopen(filename, "rb");
 
   if(file == NULL)
   {
@@ -46,6 +47,7 @@ void writeFile(int sockfd, struct sockaddr_in serv_addr, char *filename)
     printf("Error: couldn't send WRQ\n");
     return;
   }
+  return;
   result = waitForPacket(sockfd, (struct sockaddr *) &serv_addr, TFTP_OPTCODE_ACK, &packet);
   if(result > 0) sendFile(sockfd, (struct sockaddr *) &serv_addr, file);
   else
@@ -85,10 +87,10 @@ int main(int argc, char *argv[])
     switch(argv[1][1])
     {
       case 'w':
-        writeFile(sockfd, serv_addr, argv[2]);
+        putFile(sockfd, serv_addr, argv[2]);
         break;
       case 'r':
-        readFile(sockfd, serv_addr, argv[2]);
+        getFile(sockfd, serv_addr, argv[2]);
         break;
       default: 
         printf("Not a valid action \n");
