@@ -22,7 +22,6 @@
 /* This function sends a file to a remote host client or server */
 bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
-  if (DEBUG) printf("Sending File\n");
   //sudo-code
   //while there is data left to send:
   //  send a data packet
@@ -103,8 +102,8 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
   unsigned int expected_block_number = 1;
 
   do{
+      if (DEBUG) printf("Waiting for data\n");
       result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_DATA, &packet);
-      printf("Left waitForPacket\n");
       if(result == -1)     //timeout
       {
         if(timeout_counter < MAX_TFTP_TIMEOUTS)
@@ -128,30 +127,27 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
       {
         //check for correct blocknumber
         //A: Correct
-        printf("Blocknumber: %u\n",packet.data.blockNumber);
         if (DEBUG) printPacket(&packet);
         if(packet.data.blockNumber == expected_block_number)
         {
           if(fwrite(packet.data.data, 1, packet.data.dataSize, fileh))
           {
-            printf("wrote to file\n");
             expected_block_number++;
           }
           else if(packet.data.dataSize != 0)
           {
-            send_error(sockfd, cli_addr, 0, "Did not write to file.");
+            //TODO check for all file errror cases
+            send_error(sockfd, cli_addr, TFTP_ERRCODE_UNDEFINED, "Could not write to file");
             return false;
           }
           send_ack(sockfd, cli_addr, packet.data.blockNumber);
         }
         else
         {
-            send_error(sockfd, cli_addr, 0, "Incorrect packet recieved.");
+            send_error(sockfd, cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION, "Wrong block number recieved");
             return false;
         }
       }
-      printf("result: %d\n", result);
   } while(packet.data.dataSize == MAX_DATA_SIZE);
-  printf("returning");
   return true;
 }

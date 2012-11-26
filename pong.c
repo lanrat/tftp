@@ -1,11 +1,8 @@
 //#include "pong.h"
 #include "tftp.h"
 
-volatile bool timeout;
-
 //returns the handle to a socket on the given port
 //if the port is 0 then the OS will pick an avaible port
-
 int createUDPSocketAndBind(int port)
 {
   int sockfd;
@@ -118,11 +115,10 @@ bool send_ack(int sockfd, struct sockaddr* sockInfo, u_int16_t blockNumber)
 
 
 // THIS CODE IS FOR TIMEOUTS!
-void handler(int sig)
+void catchAlarm(int blah)
 {
-  timeout = true;
-  printf("Handler Reached\n");
-  alarm(0);
+  //do nothing
+  return;
 }
 
 
@@ -135,34 +131,60 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
   char buffer[BUFSIZE];
   size_t n;
   size_t cli_size = sizeof(cli_addr);
-  timeout = false;
+  struct sigaction myAction;
 
-  signal(SIGALRM, handler);
+  //setup the signal alarm
+  myAction.sa_handler = catchAlarm;
+  if (sigfillset(&myAction.sa_mask) < 0)
+  {
+    if (DEBUG) printf("could not set sighandler\n");
+    return -1;
+  }
+  myAction.sa_flags = 0;
+  if (sigaction(SIGALRM,&myAction,0) < 0)
+  {
+    if (DEBUG) printf("could not set sig alarm\n");
+    return -1;
+  }
   alarm(TFTP_TIMEOUT_DURATION);
 
-  do{
+  errno = 0;
+  while (true)
+  {
     if (DEBUG) printf("waiting for response..");
     n = recvfrom(sockfd, buffer, BUFSIZE, 0, cli_addr, (socklen_t *)&cli_size);
     if (DEBUG) printf("done\n");
-    if (unserializePacket(buffer, n, packet) == NULL)
+    if (errno != 0)
     {
+      if (errno == EINTR)
+      {
+        //we got a timeout
+        if (DEBUG) printf("Timeout detected\n");
+
+      }else{
+        //some other error
+        if (DEBUG) printf("Errno with value[%d]\n",errno);
+      }
+      alarm(0);
       return -1;
     }
-    printf("unserialized %lu bytes received\n", n);
+    if (unserializePacket(buffer, n, packet) == NULL)
+    {
+      alarm(0);
+      return -1;
+    }
     if (packet->optcode == optcode)
     {
-      printf("Received correct packet\n");
       alarm(0);
       return n;
     }
     else if(packet->optcode == TFTP_OPTCODE_ERR)
     {
       alarm(0);
-      return 0;
+      return -1;
     }
-  } while(!timeout);
-  printf("Noticed Timeout\n");
-  //will only exit while loop if there had been a timeout that stopped the loop
+  }
+  //should never reach this
   alarm(0);
   return -1;
 }
