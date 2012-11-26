@@ -105,6 +105,9 @@ void packet_recieve_loop(int sockfd)
   pid_t fork_id;
   PACKET packet;
 
+
+  printf("Server started\n");
+
   //main loop
   while (true)
   {
@@ -173,12 +176,22 @@ void packet_recieve_loop(int sockfd)
 
 int main(int argc, char *argv[])
 {
-  //TODO allow changing of default port via comand line args
+  int port = SERV_UDP_PORT;
+  if (argc > 2 && argv[1][0] == '-' && argv[1][1] == 'p')
+  {
+    //change the default port
+    port = atoi(argv[2]);
+  }else if (argc != 1)
+  {
+    //print usage
+    printf("Usage: %s [-p port]\n",argv[0]);
+    return 0;
+  }
 
   int sockfd;
 
   //bind to our socket
-  sockfd = createUDPSocketAndBind(SERV_UDP_PORT);
+  sockfd = createUDPSocketAndBind(port);
 
   //run the main loop
   packet_recieve_loop(sockfd);
