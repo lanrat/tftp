@@ -137,13 +137,13 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
   myAction.sa_handler = catchAlarm;
   if (sigfillset(&myAction.sa_mask) < 0)
   {
-    if (DEBUG) printf("could not set sighandler\n");
+    if (DEBUG) printf("Could not set sighandler\n");
     return -1;
   }
   myAction.sa_flags = 0;
   if (sigaction(SIGALRM,&myAction,0) < 0)
   {
-    if (DEBUG) printf("could not set sig alarm\n");
+    if (DEBUG) printf("Could not set sig alarm\n");
     return -1;
   }
   alarm(TFTP_TIMEOUT_DURATION);
@@ -151,7 +151,7 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
   errno = 0;
   while (true)
   {
-    if (DEBUG) printf("waiting for response..");
+    if (DEBUG) printf("Waiting for response..");
     n = recvfrom(sockfd, buffer, BUFSIZE, 0, cli_addr, (socklen_t *)&cli_size);
     if (DEBUG) printf("done\n");
     if (errno != 0)
@@ -181,7 +181,7 @@ int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACK
     else if(packet->optcode == TFTP_OPTCODE_ERR)
     {
       alarm(0);
-      return -1;
+      return 0;
     }
   }
   //should never reach this

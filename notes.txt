@@ -1,32 +1,23 @@
-
-Extera Credit:
-    Implement a run-time option to choose the group specific port from the
-    command line, for example, tftpserver -p 7000. If the option is passed to the
-    server, it specifies the port to listen to, while if it is passed to the client, it
-    specifies the port to which the initial request must be sent to. This makes
-    your programs inter operable with standards compliant implementations that
-    use “well-known” UDP port # 69. If the option is not present, your programs
-    must use your assigned port # as the default.
-
     Error messages
 
-    multi-user
-
-Alarms/timeouts:
-    The problem we face by calling alarm() within a loop is that it would get reset always, before the timeout occurs.
-    A good way to implement alarm() functionality is to call the first alarm() in your main() function (or some other specific function invoked for sending/receiving packets).
-    When this alarm() counts down to 0, program execution would shift to the Handler function, which has been defined for handling the the alarm().
-    Within the Handler function, you can set the alarm() again. This should prevent alarm() calls from looping.
-    --
-    At every timeout expiry, RESEND the message.
-    After 10 CONSECUTIVE retransmissions corresponding to 10 timeouts, your session should gracefully terminate.
-
-
 TODO: Support only simple filenames
-
 
 On the other hand, duplicate messages are handled in an asymmetric manner.
 When you receive a duplicate data message, you must retransmit the last ACK
 message, but when you receive a duplicate ACK message do not retransmit the last
 DATA message, to avoid the sorcerer's apprentice bug.
-'
+
+
+To detect lost messages and crashed or unavailable peers, you must use timeouts.
+After sending a message, set a timer of duration T seconds (of your choice) and
+wait for a reply. If the timer expires before a message is received, a timeout
+has occurred. By retransmitting the last message sent, you can recover from lost 
+messages in either direction. If the peer has crashed or is unavailable however, 
+you must terminate the connection after 10 consecutive timeouts. For this reason,
+you need to keep a timeout counter that is increased on every timeout, and reset
+to zero when a message is received. It does not matter whether the received message
+is new or duplicate, what matters is that connectivity is being maintained.
+
+The client may terminate due to timeouts while sending its initial request,
+meaning the server is unavailable, while both client and server may terminate
+due to timeouts during a session, meaning the peer has crashed.

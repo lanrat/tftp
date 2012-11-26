@@ -63,9 +63,10 @@ void putFile(int port, char *filename)
   FILE * file;
   file = fopen(filename, "rb");
 
+  //TODO handle file error cases
   if(file == NULL)
   {
-    printf("file is null\n");
+    printf("Unbable to open file\n");
     return;
   }
 
@@ -80,14 +81,23 @@ void putFile(int port, char *filename)
 
   if(!send_WRQ(sockfd, (struct sockaddr *) &serv_addr, filename, TFTP_SUPORTED_MODE))
   {
-    printf("Error: couldn't send WRQ\n");
+    printf("Error: couldn't send WRQ to server\n");
     return;
   }
   result = waitForPacket(sockfd, (struct sockaddr *) &serv_addr, TFTP_OPTCODE_ACK, &packet);
-  if(result > 0) sendFile(sockfd, (struct sockaddr *) &serv_addr, file);
-  else
+  if (result < 0)
   {
-    printf("Couldn't sendfile()\n");
+    printf("Error: Could not send packet to server\n");
+  }else if (packet.optcode == TFTP_OPTCODE_ERR)
+  {
+    //we recieved an error, print it
+    printError(&packet);
+  }else
+  {
+    if (!sendFile(sockfd, (struct sockaddr *) &serv_addr, file))
+    {
+      printf("Unable to send file to server\n");
+    }
   }
   fclose(file);
   return;

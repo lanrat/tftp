@@ -108,7 +108,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
         else
         {
-          send_error(sockfd, cli_addr, 0, "Too many timeouts.\n");
+          send_error(sockfd, cli_addr, 0, "Too many timeouts\n");
           return false; 
         }
 
@@ -145,8 +145,9 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
         else
         {
-            send_error(sockfd, cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION, "Wrong block number recieved");
-            return false;
+          //TODO fix this logic
+          send_error(sockfd, cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION, "Wrong block number recieved");
+          return false;
         }
       }
   } while(packet.data.dataSize == MAX_DATA_SIZE);
