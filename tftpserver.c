@@ -15,6 +15,12 @@ bool server_send(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
     return false;
   }
 
+  if (strchr(packet->read_request.filename,'/') != NULL )
+  {
+    send_error(sockfd,cli_addr,TFTP_ERRCODE_ACCESS_VIOLATION,"Folders not permitted");
+    return false;
+  }
+
   fileh = fopen(packet->read_request.filename,"rb");
 
   //check for file errors
@@ -42,6 +48,12 @@ bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
     {
       //unsuported mode
       send_error(sockfd,cli_addr,TFTP_ERRCODE_ILLEGAL_OPERATION,"Only octet mode is supported");
+      return false;
+    }
+
+    if (strchr(packet->write_request.filename,'/') != NULL )
+    {
+      send_error(sockfd,cli_addr,TFTP_ERRCODE_ACCESS_VIOLATION,"Folders not permitted");
       return false;
     }
 

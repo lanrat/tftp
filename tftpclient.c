@@ -21,6 +21,12 @@ void getFile(int port, char *filename)
   struct sockaddr_in serv_addr;
   FILE * file;
 
+  if (strchr(filename,'/') != NULL )
+  {
+    printf("We do not support file transfer out of the current working directory\n");
+    return;
+  }
+
   file = fopen(filename, "wb");
 
   if(file == NULL)
@@ -60,6 +66,15 @@ void putFile(int port, char *filename)
   PACKET packet;
   int result;
   FILE * file;
+  
+  
+  if (strchr(filename,'/') != NULL )
+  {
+    printf("We do not support file transfer out of the current working directory\n");
+    return;
+  }
+
+  
   file = fopen(filename, "rb");
 
   if(file == NULL)

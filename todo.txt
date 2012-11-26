@@ -1,3 +1,1 @@
-Support only simple filenames
-
 Timeouts on inital RRQ and WRQ
