@@ -80,7 +80,7 @@ bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
     //send ack
     send_ack(sockfd,cli_addr,0);
     
-    return recvFile(sockfd,cli_addr,fileh);
+    return recvFile(sockfd,cli_addr,fileh,NULL);
 }
 
 void run_child(struct sockaddr cli_addr, PACKET * packet)

@@ -46,7 +46,6 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
     n = fread(buffer,1,MAX_DATA_SIZE,fileh);
 
     if (DEBUG) printf("Sending Data: [%u] ",blockNumber);
-    //TODO make gerneric
     if (!send_data(sockfd, cli_addr, blockNumber,buffer,n))
     {
       return false;
@@ -91,7 +90,7 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 
 
 /* This function recieves a file from a remote host client or server */
-bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
+bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh, char* filename)
 {
 
   PACKET packet;
@@ -106,6 +105,10 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
       if(timeout_counter < MAX_TFTP_TIMEOUTS)
       {
         //send gerneric
+        if (filename != NULL && blockNumber == 1) //resent the inital RRQ if we timeout on the first packet
+        {
+          send_RRQ(sockfd,cli_addr,filename,TFTP_SUPORTED_MODE);
+        }
         timeout_counter++;
       }
       else
@@ -119,8 +122,7 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
       //error handler
       printError(&packet);
       return false;
-    }
-    else //correct packet type
+    }else //correct packet type
     {
       //check for correct blocknumber
       if(packet.data.blockNumber == blockNumber)
@@ -154,6 +156,6 @@ bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
         }
       }
     }
-  } while(packet.data.dataSize == MAX_DATA_SIZE);
+  } while(packet.data.dataSize == MAX_DATA_SIZE || (blockNumber == 1 && filename != NULL));
   return true;
 }

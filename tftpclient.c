@@ -49,7 +49,7 @@ void getFile(int port, char *filename)
     printf("Error: couldn't send RRQ\n");
     return;
   }
-  if(!recvFile(sockfd, (struct sockaddr *) &serv_addr, file))
+  if(!recvFile(sockfd, (struct sockaddr *) &serv_addr, file,filename))
   {
     printf("Error: didn't receive file\n");
     return;
@@ -65,7 +65,8 @@ void putFile(int port, char *filename)
   struct sockaddr_in serv_addr;
   PACKET packet;
   int result;
-  FILE * file;
+  FILE * fileh;
+  int timeout_counter = 0;
   
   
   if (strchr(filename,'/') != NULL )
@@ -75,9 +76,9 @@ void putFile(int port, char *filename)
   }
 
   
-  file = fopen(filename, "rb");
+  fileh = fopen(filename, "rb");
 
-  if(file == NULL)
+  if(fileh == NULL)
   {
     perror(filename);
     return;
@@ -97,22 +98,42 @@ void putFile(int port, char *filename)
     printf("Error: couldn't send WRQ to server\n");
     return;
   }
-  result = waitForPacket(sockfd, (struct sockaddr *) &serv_addr, TFTP_OPTCODE_ACK, &packet);
+  while (timeout_counter < MAX_TFTP_TIMEOUTS)
+  {
+    result = waitForPacket(sockfd, (struct sockaddr *) &serv_addr, TFTP_OPTCODE_ACK, &packet);
+    if (result < 0)
+    {
+      printf("Error: Timeout sending packet to server\n");
+      if(!send_WRQ(sockfd, (struct sockaddr *) &serv_addr, filename, TFTP_SUPORTED_MODE))
+      {
+        printf("Error: couldn't send WRQ to server\n");
+        return;
+      }
+      timeout_counter++;
+    }else
+    {
+      break;
+    }
+  }
   if (result < 0)
   {
-    printf("Error: Could not send packet to server\n");
-  }else if (packet.optcode == TFTP_OPTCODE_ERR)
+    //we still timed out
+    printf("Timed out after %d tries, is the server running\n",MAX_TFTP_TIMEOUTS);
+    fclose(fileh);
+    return;
+  }
+  if (packet.optcode == TFTP_OPTCODE_ERR)
   {
     //we recieved an error, print it
     printError(&packet);
   }else
   {
-    if (!sendFile(sockfd, (struct sockaddr *) &serv_addr, file))
+    if (!sendFile(sockfd, (struct sockaddr *) &serv_addr, fileh))
     {
       printf("Unable to send file to server\n");
     }
   }
-  fclose(file);
+  fclose(fileh);
   return;
 }
 
