@@ -105,7 +105,6 @@ void packet_recieve_loop(int sockfd)
   pid_t fork_id;
   PACKET packet;
 
-
   printf("Server started\n");
 
   //main loop
@@ -128,12 +127,7 @@ void packet_recieve_loop(int sockfd)
       }
       exit(1);
     }
-    //TODO
-    /* Note that if you are using timeouts, n<0 may not mean an error, */
-    /* but that the call was interrupted by a signal. To see what      */
-    /* happened, you have to look at the value of the system variable  */
-    /* errno (defined in <errno.h>).*/
-
+    
     if (childCount < MAX_TFTP_CLIENTS)
     {
       unserializePacket(buffer,recv_len,&packet);
@@ -191,6 +185,7 @@ int main(int argc, char *argv[])
   int sockfd;
 
   //bind to our socket
+  printf("Using Port %d\n",port);
   sockfd = createUDPSocketAndBind(port);
 
   //run the main loop

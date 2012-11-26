@@ -1,7 +1,7 @@
 #include "tftp.h"
 
 
-struct sockaddr_in getServerStruct()
+struct sockaddr_in getServerStruct(int port)
 {
   struct sockaddr_in serv_addr;
 
@@ -9,13 +9,13 @@ struct sockaddr_in getServerStruct()
   serv_addr.sin_family = AF_INET;
 
   serv_addr.sin_addr.s_addr = inet_addr(SERV_HOST_ADDR);
-  serv_addr.sin_port = htons(SERV_UDP_PORT);
+  serv_addr.sin_port = htons(port);
 
   return serv_addr;
 }
 
 
-void getFile(char *filename)
+void getFile(int port, char *filename)
 {
   int sockfd;
   struct sockaddr_in serv_addr;
@@ -31,7 +31,7 @@ void getFile(char *filename)
   }
 
   sockfd = createUDPSocketAndBind(0);
-  serv_addr = getServerStruct();
+  serv_addr = getServerStruct(port);
 
   if(sockfd < 0)
   {
@@ -54,7 +54,7 @@ void getFile(char *filename)
 }
 
 
-void putFile(char *filename)
+void putFile(int port, char *filename)
 {
   int sockfd;
   struct sockaddr_in serv_addr;
@@ -70,7 +70,7 @@ void putFile(char *filename)
   }
 
   sockfd = createUDPSocketAndBind(0);
-  serv_addr = getServerStruct();
+  serv_addr = getServerStruct(port);
 
   if(sockfd < 0)
   {
@@ -96,25 +96,32 @@ void putFile(char *filename)
 
 int main(int argc, char *argv[])
 {
-  //TODO strotk_r
-  //TODO port Numbers
-  //TODO print usage
-  if(argv[1][0] == '-')
+  int port = SERV_UDP_PORT;
+  int argOffset = 1;
+  char* filename;
+  
+  if (argc == 5 && argv[1][0] == '-' && argv[1][1] == 'p')
   {
+    //change the port
+    port = atoi(argv[2]);
+    argOffset +=2;
+  }
 
-    switch(argv[1][1])
+  if(( argc == 3 || argc == 5) && argv[argOffset][0] == '-')
+  {
+    switch(argv[argOffset][1])
     {
       case 'w':
-      case 'p': //put file
-        putFile(argv[2]);
-        break;
+        putFile(port,argv[argOffset+1]);
+        return;
       case 'r':
-      case 'g': //get file
-        getFile(argv[2]);
-        break;
+        getFile(port,argv[argOffset+1]);
+        return;
       default: 
-        printf("Not a valid action \n");
+        printf("Unknown action [%s] \n",argv[argOffset]);
         break;
     }
+    //print usage
   }
+  printf("Usage: %s [-p port] (-w putfile || -r getFile)\n",argv[0]);
 }
