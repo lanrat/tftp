@@ -79,9 +79,11 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
   switch (packet->optcode)
   {
     case TFTP_OPTCODE_RRQ:
+      printf("Prossessng client READ request for %s\n",packet->read_request.filename);
       result = server_send(child_sockfd,&cli_addr,packet);
       break;
     case TFTP_OPTCODE_WRQ:
+      printf("Prossessng client WRITE request for %s\n",packet->read_request.filename);
       result = server_recieve(child_sockfd,&cli_addr,packet);
       break;
     default:
@@ -93,6 +95,7 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
   {
     printf("Failed to handle client request\n");
   }
+  printf("Done processing client request\n");
 }
 
 
@@ -149,7 +152,7 @@ void packet_recieve_loop(int sockfd)
       close(sockfd);
       childCount++;
 
-      if (DEBUG) printPacket(&packet);
+      //if (DEBUG) printPacket(&packet);
 
       //child code here, deal with the packet
       run_child(cli_addr,&packet);

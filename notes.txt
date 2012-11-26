@@ -7,17 +7,5 @@ When you receive a duplicate data message, you must retransmit the last ACK
 message, but when you receive a duplicate ACK message do not retransmit the last
 DATA message, to avoid the sorcerer's apprentice bug.
 
+    TODO timeouts on inital RRQ and WRQ
 
-To detect lost messages and crashed or unavailable peers, you must use timeouts.
-After sending a message, set a timer of duration T seconds (of your choice) and
-wait for a reply. If the timer expires before a message is received, a timeout
-has occurred. By retransmitting the last message sent, you can recover from lost 
-messages in either direction. If the peer has crashed or is unavailable however, 
-you must terminate the connection after 10 consecutive timeouts. For this reason,
-you need to keep a timeout counter that is increased on every timeout, and reset
-to zero when a message is received. It does not matter whether the received message
-is new or duplicate, what matters is that connectivity is being maintained.
-
-The client may terminate due to timeouts while sending its initial request,
-meaning the server is unavailable, while both client and server may terminate
-due to timeouts during a session, meaning the peer has crashed.
