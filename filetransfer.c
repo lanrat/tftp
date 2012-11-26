@@ -92,64 +92,65 @@ bool sendFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 /* This function recieves a file from a remote host client or server */
 bool recvFile(int sockfd, struct sockaddr* cli_addr, FILE* fileh)
 {
-  
+
   PACKET packet;
   int result;
   unsigned int timeout_counter = 0;
-  unsigned int expected_block_number = 1;
+  u_int16_t blockNumber = 1;
 
   do{
-      result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_DATA, &packet);
-      if(result == -1)     //timeout
+    result = waitForPacket(sockfd, cli_addr, TFTP_OPTCODE_DATA, &packet);
+    if(result == -1)     //timeout
+    {
+      if(timeout_counter < MAX_TFTP_TIMEOUTS)
       {
-        if(timeout_counter < MAX_TFTP_TIMEOUTS)
-        {
-          timeout_counter++;
-        }
-        else
-        {
-          send_error(sockfd, cli_addr, 0, "Too many timeouts\n");
-          return false; 
-        }
-
+        timeout_counter++;
       }
-      else if(packet.optcode == TFTP_OPTCODE_ERR)
+      else
       {
-        //error handler
-        printError(&packet);
+        send_error(sockfd, cli_addr, TFTP_ERRCODE_ACCESS_VIOLATION, "Too many timeouts\n");
         return false;
       }
-      else //correct packet
+    }
+    else if(packet.optcode == TFTP_OPTCODE_ERR)
+    {
+      //error handler
+      printError(&packet);
+      return false;
+    }
+    else //correct packet type
+    {
+      //check for correct blocknumber
+      if(packet.data.blockNumber == blockNumber)
       {
-        //check for correct blocknumber
-        //A: Correct
-        //if (DEBUG) printPacket(&packet);
-        if(packet.data.blockNumber == expected_block_number)
+        if(fwrite(packet.data.data, 1, packet.data.dataSize, fileh))
         {
-          if(fwrite(packet.data.data, 1, packet.data.dataSize, fileh))
-          {
-            expected_block_number++;
-          }
-          else if(packet.data.dataSize != 0)
-          {
-            //TODO check for all file errror cases
-            send_error(sockfd, cli_addr, TFTP_ERRCODE_UNDEFINED, "Could not write to file");
-            return false;
-          }
-          if (DEBUG) printf("Sending Ack: [%u] ",packet.data.blockNumber);
-          if (!send_ack(sockfd, cli_addr, packet.data.blockNumber))
-          {
-            return false;
-          }
-          if (DEBUG) printf("Sent\n");
+          blockNumber++;
         }
-        else
+        else if(packet.data.dataSize != 0)
         {
-          //TODO fix this logic
+          //TODO check for all file errror cases
+          send_error(sockfd, cli_addr, TFTP_ERRCODE_UNDEFINED, "Could not write to file");
+          return false;
+        }
+        if (DEBUG) printf("Sending Ack: [%u] ",packet.data.blockNumber);
+        if (!send_ack(sockfd, cli_addr, packet.data.blockNumber))
+        {
+          return false;
+        }
+        if (DEBUG) printf("Sent\n");
+      }
+      else
+      {
+        //TODO fix this logic
+        if (DEBUG) printf("Error: expected block [%u] but got [%u]\n",blockNumber,packet.data.blockNumber);
+        if (blockNumber < packet.data.blockNumber)
+        {
           send_error(sockfd, cli_addr, TFTP_ERRCODE_ILLEGAL_OPERATION, "Wrong block number recieved");
           return false;
         }
       }
+    }
   } while(packet.data.dataSize == MAX_DATA_SIZE);
   return true;
 }
