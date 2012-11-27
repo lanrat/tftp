@@ -16,7 +16,6 @@ typedef int bool;
 #define false 0
 
 #include "packets.h"
-#include "test.h"
 #include "common.h"
 #include "pong.h"
 #include "filetransfer.h"
@@ -30,7 +29,7 @@ typedef int bool;
 #define MAX_TFTP_TIMEOUTS 10
 #define TFTP_TIMEOUT_DURATION 5 //seconds
 
-//we ontl support octet mode
+//we only support octet mode
 #define TFTP_SUPORTED_MODE "octet"
 
 //max packet size

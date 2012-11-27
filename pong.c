@@ -1,4 +1,3 @@
-//#include "pong.h"
 #include "tftp.h"
 
 //returns the handle to a socket on the given port
