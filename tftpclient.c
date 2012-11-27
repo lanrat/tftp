@@ -1,6 +1,6 @@
 #include "tftp.h"
 
-
+//returns a struct for the server information
 struct sockaddr_in getServerStruct(int port)
 {
   struct sockaddr_in serv_addr;
@@ -15,6 +15,7 @@ struct sockaddr_in getServerStruct(int port)
 }
 
 
+//called when we retrieve a file from the server
 void getFile(int port, char *filename)
 {
   int sockfd;
@@ -59,6 +60,7 @@ void getFile(int port, char *filename)
 }
 
 
+//used to upload files to the server
 void putFile(int port, char *filename)
 {
   int sockfd;
@@ -138,6 +140,7 @@ void putFile(int port, char *filename)
 }
 
 
+//main client, checks for args and starts an operation if no errors detected
 int main(int argc, char *argv[])
 {
   int port = SERV_UDP_PORT;

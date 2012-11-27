@@ -5,7 +5,7 @@
 
 /* Network communications are nothing but a game of pong.
  * I send a packet, you respond. I send another, miss your resposne,
- * you get a point while I get all angry, timeout and send another
+ * you get a point while I get all angry, timeout and send another.
  *   --Ian
  */
 

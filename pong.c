@@ -113,7 +113,7 @@ void catchAlarm(int blah)
 
 
 //3 possible outcomes
-//timeout or other error: retrn -1
+//timeout or other error: return -1
 //got desired packet: size of packet returned
 //error recieved: 0
 int waitForPacket(int sockfd, struct sockaddr* cli_addr, u_int16_t optcode, PACKET* packet)

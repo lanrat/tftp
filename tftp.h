@@ -36,4 +36,7 @@ typedef int bool;
 //max packet size
 #define BUFSIZE 2048
 
+//for testing
+#define DEBUG true
+
 #endif

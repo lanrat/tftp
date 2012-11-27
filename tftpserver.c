@@ -3,6 +3,7 @@
 //used for counting the number of children procs
 static unsigned int childCount = 0;
 
+//called when the server needs to send a file to a client
 bool server_send(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
 {
   FILE* fileh;
@@ -39,6 +40,7 @@ bool server_send(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
   return sendFile(sockfd,cli_addr,fileh);
 }
 
+//called when the server recieves a WRQ
 bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
 {
     FILE* fileh;
@@ -83,6 +85,7 @@ bool server_recieve(int sockfd, struct sockaddr* cli_addr, PACKET* packet)
     return recvFile(sockfd,cli_addr,fileh,NULL);
 }
 
+//this method is in charge of each new client request
 void run_child(struct sockaddr cli_addr, PACKET * packet)
 {
   if (packet == NULL)
@@ -119,6 +122,7 @@ void run_child(struct sockaddr cli_addr, PACKET * packet)
 }
 
 
+//main loop which waits for all packets and acts on them
 void packet_recieve_loop(int sockfd)
 {
   struct sockaddr cli_addr;
@@ -190,7 +194,7 @@ void packet_recieve_loop(int sockfd)
   close(sockfd);
 }
 
-
+//main server function, checks for possible args and starts the server
 int main(int argc, char *argv[])
 {
   int port = SERV_UDP_PORT;
