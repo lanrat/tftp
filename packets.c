@@ -48,7 +48,7 @@ PACKET * unserializePacket(char * buffer, size_t bufferSize, PACKET* packet)
       charncpy(packet->error.message,dataOffset, MAX_STRING_SIZE);
       break;
     default:
-      free(packet);
+      //free(packet); dont want to do this!
       return NULL;
   }
   //done
